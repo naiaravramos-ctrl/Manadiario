@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#7a5c45" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Maná Diário" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Maná Diário | Devocional Cristão</title>
+  <meta name="description" content="Devocional cristão diário com reflexão pessoal privada por usuário." />
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --surface: #fffdf8;
+      --surface-2: #f1eadf;
+      --text: #2f2a24;
+      --muted: #756c61;
+      --primary: #7a5c45;
+      --primary-2: #a48368;
+      --accent: #d9b892;
+      --border: rgba(78, 60, 44, 0.12);
+      --shadow: 0 16px 40px rgba(67, 50, 36, 0.10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(217,184,146,.24), transparent 30%),
+        linear-gradient(180deg, #fbf8f3 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    button, textarea, input { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+    .hidden { display: none !important; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: min(460px, 100%);
+      background: rgba(255,253,248,.95);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      width: 50px;
+      height: 50px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      font-size: 24px;
+    }
+
+    .brand h1 { margin: 0; font-size: 22px; }
+    .brand small { color: var(--muted); }
+
+    .login-card h2 { margin: 10px 0 8px; }
+    .login-card p { color: var(--muted); line-height: 1.6; }
+
+    .field { margin-top: 16px; }
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 14px;
+      padding: 13px 14px;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: var(--primary-2);
+      box-shadow: 0 0 0 4px rgba(164,131,104,.12);
+    }
+
+    .login-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .primary-btn, .secondary-btn, .ghost-btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 17px;
+      font-weight: 700;
+    }
+
+    .primary-btn { background: var(--primary); color: white; }
+    .secondary-btn { background: var(--surface-2); color: var(--text); }
+    .ghost-btn { background: transparent; color: var(--muted); }
+
+    .login-note {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .app {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+
+    .topbar h2 {
+      margin: 0 0 5px;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -1px;
+    }
+
+    .topbar p { margin: 0; color: var(--muted); }
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .user-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #5f4938, #8b6b51);
+      color: white;
+      border-radius: 30px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .hero-card::after {
+      content: "✦";
+      position: absolute;
+      right: 30px;
+      top: 10px;
+      font-size: 120px;
+      color: rgba(255,255,255,.08);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .hero-card h3 {
+      font-family: Georgia, "Times New Roman", serif;
+      margin: 0;
+      max-width: 780px;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.08;
+      font-weight: 600;
+    }
+
+    .hero-meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: rgba(255,255,255,.82);
+    }
+
+    .card {
+      background: rgba(255,253,248,.94);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(68,52,38,.06);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+
+    .card h4 { margin: 0 0 14px; font-size: 22px; }
+
+    .card p {
+      color: #4e463e;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    blockquote {
+      margin: 18px 0 26px;
+      padding: 22px;
+      border-left: 4px solid var(--accent);
+      background: var(--surface-2);
+      border-radius: 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 20px;
+      line-height: 1.55;
+    }
+
+    blockquote span:last-child {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .question-box {
+      background: linear-gradient(135deg, #efe4d5, #f7f0e8);
+      border-radius: 18px;
+      padding: 22px;
+      margin-top: 22px;
+    }
+
+    .question-box strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      outline: none;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    textarea:focus {
+      border-color: var(--primary-2);
+      box-shadow: 0 0 0 4px rgba(164,131,104,.12);
+    }
+
+    .counter {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .saved-status {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #5f745f;
+      font-weight: 700;
+    }
+
+    .history-entry {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-entry:last-child {
+      border-bottom: 0;
+    }
+
+    .history-date {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .history-entry h5 {
+      margin: 0 0 5px;
+      font-size: 19px;
+    }
+
+    .history-reference {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .history-text {
+      background: var(--surface-2);
+      border-radius: 14px;
+      padding: 16px;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      color: #4e463e;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 40px 12px 22px;
+      color: var(--muted);
+    }
+
+    .prayer-box {
+      background: linear-gradient(135deg, #f3eadf, #fffaf3);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin-top: 24px;
+    }
+
+    .prayer-box h4 {
+      margin: 0 0 10px;
+    }
+
+    .prayer-text {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.75;
+      color: #4b4037;
+      white-space: pre-line;
+    }
+
+    .completion-card {
+      text-align: center;
+      background: linear-gradient(135deg, #fffaf3, #efe4d5);
+    }
+
+    .reward-icon {
+      font-size: 46px;
+      margin-bottom: 8px;
+    }
+
+    .reward-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .reward-stat {
+      background: rgba(255,255,255,.72);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .reward-stat strong {
+      display: block;
+      font-size: 28px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .reward-stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .reward-message {
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+
+    .monthly-progress {
+      margin: 24px auto 20px;
+      padding: 22px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.58);
+      border: 1px solid var(--border);
+    }
+
+    .monthly-progress h5 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .monthly-progress p {
+      margin: 0 0 18px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .thermometer-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      min-height: 255px;
+      position: relative;
+      padding-top: 18px;
+    }
+
+    .thermometer {
+      width: 72px;
+      height: 220px;
+      position: relative;
+      filter: drop-shadow(0 10px 14px rgba(74,50,30,.14));
+    }
+
+    .thermometer-tube {
+      position: absolute;
+      left: 20px;
+      top: 0;
+      width: 32px;
+      height: 175px;
+      background: #fff;
+      border: 4px solid #6f6257;
+      border-bottom: 0;
+      border-radius: 20px 20px 4px 4px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .thermometer-fill {
+      position: absolute;
+      left: 5px;
+      right: 5px;
+      bottom: 0;
+      height: 0%;
+      border-radius: 10px 10px 0 0;
+      background: linear-gradient(180deg, #ffd76d 0%, #f6a623 48%, #e76722 100%);
+      transition: height .8s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .thermometer-bulb {
+      position: absolute;
+      left: 5px;
+      bottom: 0;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #f08b26;
+      border: 4px solid #6f6257;
+      box-shadow: inset 0 0 0 8px #fff2d8;
+      z-index: 3;
+    }
+
+    .thermometer-bulb::after {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ef7b22;
+      left: 13px;
+      top: 13px;
+    }
+
+    .thermometer-scale {
+      position: absolute;
+      left: 78px;
+      top: 4px;
+      height: 170px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .thermometer-scale span::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 1px;
+      background: var(--primary-2);
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .thermo-percent {
+      margin-top: 10px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .thermo-caption {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .fire-crown {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%) scale(.6);
+      font-size: 56px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .35s ease;
+      z-index: 5;
+    }
+
+    .thermometer-wrap.on-fire .fire-crown {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      animation: flamePulse .7s ease-in-out infinite alternate;
+    }
+
+    .thermometer-wrap.on-fire .thermometer {
+      filter: drop-shadow(0 0 18px rgba(241,112,28,.55));
+    }
+
+    .thermometer-wrap.on-fire .thermometer-fill,
+    .thermometer-wrap.on-fire .thermometer-bulb::after {
+      background: linear-gradient(180deg, #fff39b 0%, #ffb12b 35%, #ef5423 72%, #c92e19 100%);
+    }
+
+    .holy-fire-message {
+      margin: 18px auto 0;
+      max-width: 520px;
+      padding: 18px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fff0c6, #ffd18a);
+      color: #7b3e18;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: clamp(20px, 4vw, 28px);
+      line-height: 1.3;
+      box-shadow: 0 10px 28px rgba(199,92,23,.18);
+      animation: messageGlow 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes flamePulse {
+      from { transform: translateX(-50%) scale(.94) rotate(-2deg); }
+      to { transform: translateX(-50%) scale(1.08) rotate(2deg); }
+    }
+
+    @keyframes messageGlow {
+      from { box-shadow: 0 8px 20px rgba(199,92,23,.12); }
+      to { box-shadow: 0 10px 32px rgba(199,92,23,.30); }
+    }
+
+    .completed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #e9f2ea;
+      color: #4f6d54;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    @media (max-width: 520px) {
+      .reward-stats { grid-template-columns: 1fr; }
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      background: #2e2a25;
+      color: white;
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: .25s ease;
+      z-index: 99;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 700px) {
+      .app { padding: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .user-box { justify-content: flex-start; }
+      .hero-card { padding: 24px; }
+      .card { padding: 20px; }
+      .login-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-icon">✦</div>
+        <div>
+          <h1>Maná Diário</h1>
+          <small>Seu momento pessoal com Deus</small>
+        </div>
+      </div>
+
+      <h2>Entrar no seu espaço</h2>
+      <p>Cada pessoa possui uma conta individual. Suas reflexões, sequência e recompensas ficam privadas e vinculadas apenas ao seu usuário.</p>
+
+      <div class="field">
+        <label for="username">Nome</label>
+        <input id="username" type="text" maxlength="40" placeholder="Ex.: Naiara" autocomplete="name" />
+      </div>
+
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input id="email" type="email" maxlength="120" placeholder="voce@email.com" autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="pin">Senha</label>
+        <input id="pin" type="password" minlength="6" maxlength="72" placeholder="Mínimo de 6 caracteres" autocomplete="current-password" />
+      </div>
+
+      <div class="login-actions">
+        <button class="primary-btn" id="enterBtn">Entrar</button>
+        <button class="secondary-btn" id="createBtn">Criar perfil</button>
+      </div>
+
+      <div class="login-note" id="backendStatus">
+        Verificando conexão com o banco de dados...
+      </div>
+    </div>
+  </section>
+
+  <main id="app" class="app hidden">
+    <div class="topbar">
+      <div>
+        <h2>Seu devocional de hoje</h2>
+        <p id="todayDate"></p>
+      </div>
+
+      <div class="user-box">
+        <div class="user-chip">👤 <span id="currentUser"></span></div>
+        <button class="secondary-btn" id="historyBtn">Minhas reflexões</button>
+        <button class="ghost-btn" id="logoutBtn">Sair</button>
+      </div>
+    </div>
+
+    <div id="todayContent">
+      <section class="hero-card">
+        <div class="eyebrow">📖 DEVOCIONAL DO DIA</div>
+        <h3 id="devotionalTitle"></h3>
+        <div class="hero-meta">
+          <span id="devotionalRef"></span>
+          <span>•</span>
+          <span id="devotionalTheme"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h4>Versículo do dia</h4>
+        <blockquote>
+          <span id="verseText"></span>
+          <span id="verseRef"></span>
+        </blockquote>
+
+        <h4>Devocional</h4>
+        <div id="devotionalText"></div>
+
+        <h4>Reflexão</h4>
+        <div id="reflectionText"></div>
+
+        <div class="question-box">
+          <strong>Pergunta para refletir</strong>
+          <div id="questionText"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h4>Minha reflexão</h4>
+        <p>Escreva o que você entendeu, sentiu ou deseja colocar em prática hoje.</p>
+
+        <textarea
+          id="journal"
+          maxlength="2000"
+          placeholder="Senhor, hoje eu entendi que..."
+        ></textarea>
+
+        <div class="counter">
+          <span>Somente este perfil verá este texto neste navegador.</span>
+          <span><span id="charCount">0</span>/2000</span>
+        </div>
+
+        <div class="button-row">
+          <button class="primary-btn" id="saveBtn">Salvar reflexão</button>
+          <button class="secondary-btn" id="clearBtn">Limpar</button>
+        </div>
+
+        <div id="savedStatus" class="saved-status hidden">✓ Reflexão de hoje salva</div>
+
+        <div class="prayer-box">
+          <h4>🙏 Oração de hoje</h4>
+          <div id="prayerText" class="prayer-text"></div>
+        </div>
+      </section>
+
+      <section class="card completion-card">
+        <div class="reward-icon">✨</div>
+        <h4>Complete seu momento com Deus</h4>
+        <p class="reward-message" id="rewardMessage">
+          Finalize o devocional de hoje para registrar sua sequência e receber sua recompensa diária.
+        </p>
+
+        <div class="reward-stats">
+          <div class="reward-stat">
+            <strong id="streakCount">0</strong>
+            <span>dias consecutivos</span>
+          </div>
+          <div class="reward-stat">
+            <strong id="rewardPoints">0</strong>
+            <span>pontos de constância</span>
+          </div>
+        </div>
+
+
+        <div class="monthly-progress">
+          <h5>🔥 Termômetro de constância</h5>
+          <p>Complete o devocional todos os dias. Quanto maior sua sequência, mais o termômetro sobe.</p>
+
+          <div class="thermometer-wrap" id="thermometerWrap">
+            <div class="fire-crown" aria-hidden="true">🔥</div>
+            <div class="thermometer" aria-label="Progresso mensal">
+              <div class="thermometer-tube">
+                <div class="thermometer-fill" id="thermometerFill"></div>
+              </div>
+              <div class="thermometer-bulb"></div>
+              <div class="thermometer-scale">
+                <span>100%</span>
+                <span>75%</span>
+                <span>50%</span>
+                <span>25%</span>
+                <span>0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="thermo-percent" id="thermoPercent">0%</div>
+          <div class="thermo-caption" id="thermoCaption">0 de 0 dias consecutivos neste mês</div>
+          <div id="holyFireMessage" class="holy-fire-message hidden">🔥 O Espírito Santo queima em você! 🔥</div>
+        </div>
+
+        <button class="primary-btn" id="completeBtn">Finalizar devocional de hoje</button>
+        <div id="completedBadge" class="completed-badge hidden">✓ Devocional de hoje concluído</div>
+      </section>
+    </div>
+
+    <section id="historyContent" class="hidden">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h4 style="margin-bottom:6px;">Minhas reflexões</h4>
+            <p style="margin-top:0;">Veja o que você escreveu nos seus devocionais anteriores.</p>
+          </div>
+          <button class="secondary-btn" id="backTodayBtn">Voltar para hoje</button>
+        </div>
+        <div id="historyList"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://iobjmiroyuiisnjradex.supabase.co"; // URL base do projeto Supabase
+    // Segurança: use somente a chave publishable/anon no frontend. Nunca use service_role aqui.
+    const SUPABASE_ANON_KEY = "sb_publishable_jeLGRglvpYj5PWzgnGz1NQ_FU9OjfRm"; // chave publishable do Supabase
+
+    const devotionals = [
+      {
+        title: "Confie mesmo quando você não entende",
+        theme: "Fé e confiança",
+        reference: "Provérbios 3:5-6",
+        verse: "Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.",
+        devotional: [
+          "Nem sempre conseguimos entender o que está acontecendo em nossa vida. Existem momentos em que fazemos planos, buscamos respostas e ainda assim as coisas parecem seguir um caminho diferente.",
+          "A Palavra nos lembra que nossa confiança em Deus não deve depender de entendermos tudo. Confiar significa continuar caminhando, orando e obedecendo mesmo quando ainda não conseguimos enxergar o resultado.",
+          "Talvez hoje exista alguma situação trazendo preocupação. Entregue essa situação a Deus e peça sabedoria para lidar com aquilo que está ao seu alcance."
+        ],
+        reflection: [
+          "Às vezes queremos que Deus nos mostre todo o caminho antes de darmos o primeiro passo. Porém, muitas vezes Ele nos mostra apenas o próximo passo.",
+          "A fé cresce quando aprendemos a confiar mesmo sem ter todas as respostas."
+        ],
+        question: "Existe alguma situação que você está tentando controlar e que precisa entregar a Deus?",
+        prayer: "Senhor, eu reconheço que nem sempre consigo entender os Teus caminhos. Ajuda-me a confiar em Ti de todo o coração, mesmo quando eu não tiver todas as respostas. Entrego a Ti aquilo que está fora do meu controle. Dá-me sabedoria para fazer a minha parte e fé para descansar no que somente Tu podes fazer. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Deus está perto de você",
+        theme: "Presença de Deus",
+        reference: "Salmos 34:18",
+        verse: "Perto está o Senhor dos que têm o coração quebrantado e salva os contritos de espírito.",
+        devotional: [
+          "Há dias em que o coração fica pesado e parece difícil encontrar palavras para explicar o que sentimos.",
+          "Esse salmo nos lembra que Deus não se afasta quando estamos frágeis. Pelo contrário: Ele se aproxima, acolhe e sustenta.",
+          "Você não precisa esconder suas emoções de Deus. Fale com Ele com sinceridade."
+        ],
+        reflection: [
+          "A presença de Deus não depende de sentirmos algo extraordinário. Muitas vezes ela se manifesta no silêncio, na força para continuar e na paz que chega aos poucos."
+        ],
+        question: "O que você precisa contar a Deus com mais sinceridade hoje?",
+        prayer: "Senhor, obrigado porque a Tua presença não depende das minhas forças. Hoje eu me aproximo de Ti com sinceridade e entrego o que está pesado em meu coração. Consola-me, sustenta-me e lembra-me de que eu não estou sozinho. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Não viva dominado pela ansiedade",
+        theme: "Ansiedade e paz",
+        reference: "Filipenses 4:6-7",
+        verse: "Não andeis ansiosos de coisa alguma; em tudo, porém, sejam conhecidas diante de Deus as vossas petições.",
+        devotional: [
+          "A ansiedade tenta nos fazer viver problemas que ainda nem aconteceram. Ela leva nossos pensamentos para o amanhã e rouba a paz do presente.",
+          "Paulo nos ensina uma resposta prática: apresentar tudo a Deus em oração.",
+          "Isso não significa ignorar nossos problemas, mas escolher não carregá-los sozinhos."
+        ],
+        reflection: [
+          "A oração muda primeiro o nosso coração. Quando entregamos nossas preocupações a Deus, abrimos espaço para que a paz governe nossos pensamentos."
+        ],
+        question: "Qual preocupação você pode transformar em uma oração agora?",
+        prayer: "Senhor, eu coloco diante de Ti minhas preocupações e pensamentos ansiosos. Ensina-me a trocar o medo pela oração e a confiar na Tua paz. Guarda minha mente e meu coração, e ajuda-me a viver um dia de cada vez. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Deus renova as suas forças",
+        theme: "Força e esperança",
+        reference: "Isaías 40:31",
+        verse: "Mas os que esperam no Senhor renovarão as suas forças; subirão com asas como águias.",
+        devotional: [
+          "Cansaço não é apenas físico. Às vezes estamos cansados por dentro, depois de esperar, insistir e continuar tentando.",
+          "Isaías nos lembra que nossa força não precisa vir apenas de nós mesmos. Deus renova quem aprende a esperar nEle.",
+          "Esperar em Deus não é desistir. É continuar confiando enquanto Ele trabalha."
+        ],
+        reflection: [
+          "Você pode estar cansado, mas isso não significa que sua história terminou. Deus continua presente em cada etapa."
+        ],
+        question: "Em qual área da sua vida você mais precisa de forças renovadas?",
+        prayer: "Senhor, Tu conheces meu cansaço e minhas limitações. Renova minhas forças e minha esperança. Dá-me ânimo para continuar, paciência para esperar e coragem para permanecer firme. Que eu dependa mais de Ti do que de mim mesmo. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Escolha perdoar",
+        theme: "Perdão",
+        reference: "Efésios 4:32",
+        verse: "Antes sede uns para com os outros benignos, misericordiosos, perdoando-vos uns aos outros.",
+        devotional: [
+          "Perdoar não significa dizer que aquilo que aconteceu foi correto. Significa não permitir que a dor continue controlando nosso coração.",
+          "O evangelho nos lembra que fomos alcançados pela graça e somos convidados a oferecer graça também.",
+          "Alguns processos de perdão são rápidos; outros precisam de tempo, oração e maturidade."
+        ],
+        reflection: [
+          "Perdoar é entregar a Deus o direito de fazer justiça e escolher não alimentar continuamente o ressentimento."
+        ],
+        question: "Existe alguém ou alguma situação que você ainda precisa colocar diante de Deus no processo de perdão?",
+        prayer: "Senhor, trabalha no meu coração e ensina-me a perdoar. Cura as feridas que ainda doem e livra-me do peso do ressentimento. Dá-me sabedoria para estabelecer limites quando necessário e graça para não alimentar aquilo que me prende ao passado. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Seja fiel nas pequenas coisas",
+        theme: "Propósito",
+        reference: "Lucas 16:10",
+        verse: "Quem é fiel no pouco também é fiel no muito.",
+        devotional: [
+          "É fácil sonhar com grandes oportunidades e esquecer o valor das pequenas responsabilidades que temos hoje.",
+          "Jesus mostra que caráter e fidelidade aparecem nas coisas simples.",
+          "Talvez aquilo que parece pequeno hoje seja justamente a preparação para algo maior amanhã."
+        ],
+        reflection: [
+          "O propósito de Deus também é construído nas rotinas comuns: servir, estudar, trabalhar, amar e fazer o melhor com aquilo que já temos."
+        ],
+        question: "Em qual pequena responsabilidade Deus está chamando você a ser mais fiel?",
+        prayer: "Senhor, ajuda-me a ser fiel nas pequenas coisas. Que eu faça com excelência aquilo que está diante de mim hoje, mesmo quando ninguém estiver vendo. Forma em mim um coração constante, humilde e obediente. Em nome de Jesus, amém.",
+      },
+      {
+        title: "Comece novamente com Deus",
+        theme: "Recomeços",
+        reference: "Lamentações 3:22-23",
+        verse: "As misericórdias do Senhor são a causa de não sermos consumidos... renovam-se cada manhã.",
+        devotional: [
+          "Todo novo dia carrega uma oportunidade de recomeçar.",
+          "Mesmo quando erramos, nos frustramos ou sentimos que ficamos para trás, a misericórdia de Deus continua disponível.",
+          "Você não precisa carregar para sempre o peso de ontem. Há graça para hoje."
+        ],
+        reflection: [
+          "Recomeçar não apaga o passado; transforma a maneira como caminhamos a partir dele."
+        ],
+        question: "O que você gostaria de colocar diante de Deus e começar novamente?",
+        prayer: "Senhor, obrigado porque Tuas misericórdias se renovam a cada manhã. Entrego a Ti meus erros, frustrações e arrependimentos. Dá-me coragem para recomeçar com sabedoria, humildade e esperança. Que hoje seja um novo passo contigo. Em nome de Jesus, amém.",
+      }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const supabaseConfigured = Boolean(SUPABASE_URL.trim() && SUPABASE_ANON_KEY.trim());
+    const db = supabaseConfigured && window.supabase
+      ? window.supabase.createClient(SUPABASE_URL.trim(), SUPABASE_ANON_KEY.trim(), {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        })
+      : null;
+
+    let currentUsername = null;
+    let currentUserId = null;
+
+    // A regra de data do banco usa Australia/Brisbane. Usar a mesma zona
+    // no frontend evita divergências entre celulares/computadores em fusos diferentes.
+    const APP_TIME_ZONE = "Australia/Brisbane";
+
+    function brisbaneDateParts() {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: APP_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+      }).formatToParts(new Date());
+      return Object.fromEntries(parts.map(p => [p.type, p.value]));
+    }
+
+    function dateKey() {
+      const p = brisbaneDateParts();
+      return `${p.year}-${p.month}-${p.day}`;
+    }
+
+    function yesterdayKey() {
+      const [y,m,d] = dateKey().split("-").map(Number);
+      const utc = new Date(Date.UTC(y, m - 1, d));
+      utc.setUTCDate(utc.getUTCDate() - 1);
+      return `${utc.getUTCFullYear()}-${String(utc.getUTCMonth()+1).padStart(2,"0")}-${String(utc.getUTCDate()).padStart(2,"0")}`;
+    }
+
+    function devotionalForToday() {
+      const { year, month, day } = currentBrisbaneYMD();
+      const start = Date.UTC(2026, 0, 1);
+      const today = Date.UTC(year, month - 1, day);
+      const dayNumber = Math.floor((today - start) / 86400000);
+      return devotionals[((dayNumber % devotionals.length) + devotionals.length) % devotionals.length];
+    }
+
+    function formattedDate() {
+      const txt = new Intl.DateTimeFormat("pt-BR", {
+        timeZone: APP_TIME_ZONE,
+        weekday: "long", day: "2-digit", month: "long", year: "numeric"
+      }).format(new Date());
+      return txt.charAt(0).toUpperCase() + txt.slice(1);
+    }
+
+    function setBackendStatus() {
+      const el = $("backendStatus");
+      if (!el) return;
+      el.textContent = db
+        ? "✓ Nuvem ativa. Seus dados ficam sincronizados com sua conta em qualquer dispositivo."
+        : "Erro de configuração: Supabase indisponível. O app não salvará dados localmente.";
+    }
+
+    async function createProfile() {
+      const username = $("username").value.trim();
+      const email = $("email").value.trim();
+      const password = $("pin").value;
+
+      if (username.length < 2) return showToast("Digite seu nome.");
+      if (!email || !email.includes("@")) return showToast("Digite um e-mail válido.");
+      if (password.length < 6) return showToast("A senha precisa ter pelo menos 6 caracteres.");
+
+      if (!db) {
+        showToast("Não foi possível conectar ao Supabase. Nenhuma conta foi criada.");
+        return;
+      }
+
+      try {
+        const { data, error } = await db.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { display_name: username },
+            ...(location.protocol === "http:" || location.protocol === "https:"
+              ? { emailRedirectTo: location.origin + location.pathname }
+              : {})
+          }
+        });
+        if (error) throw error;
+
+        if (!data.session) {
+          showToast("Conta criada. Confira seu e-mail para confirmar o cadastro.");
+          return;
+        }
+
+        await enterSupabaseSession(data.session);
+        showToast("Conta criada com sucesso.");
+      } catch (err) {
+        showToast(err.message || "Não foi possível criar a conta.");
+      }
+    }
+
+    async function login(emailArg, passwordArg) {
+      const email = (emailArg || $("email").value.trim());
+      const password = passwordArg || $("pin").value;
+      if (!email || !password) return showToast("Informe e-mail e senha.");
+
+      if (!db) {
+        showToast("Não foi possível conectar ao Supabase. Tente novamente.");
+        return;
+      }
+
+      try {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        await enterSupabaseSession(data.session);
+      } catch (err) {
+        showToast(err.message || "Não foi possível entrar.");
+      }
+    }
+
+    async function verifySupabaseSchema() {
+      if (!db || !currentUserId) return { ok: false, missing: ["conexão"] };
+
+      const requiredTables = [
+        "profiles",
+        "reflections",
+        "completions",
+        "reward_state",
+        "monthly_progress"
+      ];
+      const missing = [];
+
+      for (const table of requiredTables) {
+        const { error } = await db.from(table).select("*").limit(1);
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          const missingRelation =
+            error.code === "PGRST205" ||
+            error.code === "42P01" ||
+            msg.includes("could not find the table") ||
+            msg.includes("does not exist");
+          if (missingRelation) missing.push(table);
+          else console.warn(`Supabase check ${table}:`, error);
+        }
+      }
+
+      return { ok: missing.length === 0, missing };
+    }
+
+    async function enterSupabaseSession(session) {
+      if (!session?.user) return;
+      currentUserId = session.user.id;
+      currentUsername = session.user.user_metadata?.display_name || session.user.email?.split("@")[0] || "Usuário";
+
+      let { data } = await db.from("profiles").select("display_name").eq("id", currentUserId).maybeSingle();
+      if (!data?.display_name) {
+        const fallbackName = session.user.user_metadata?.display_name || session.user.email?.split("@")[0] || "Usuário";
+        await db.from("profiles").upsert(
+          { id: currentUserId, display_name: fallbackName },
+          { onConflict: "id" }
+        );
+        data = { display_name: fallbackName };
+      }
+      currentUsername = data.display_name;
+
+      const schema = await verifySupabaseSchema();
+      if (!schema.ok) {
+        showToast(`Supabase incompleto. Tabelas ausentes: ${schema.missing.join(", ")}`);
+        console.error("Tabelas Supabase ausentes:", schema.missing);
+        return;
+      }
+
+      openApp();
+    }
+
+    function openApp() {
+      $("currentUser").textContent = currentUsername;
+      $("loginScreen").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      renderToday();
+    }
+
+    async function logout() {
+      if (db) await db.auth.signOut();
+      currentUsername = null;
+      currentUserId = null;
+      sessionStorage.removeItem("mana_active_user_email");
+      $("app").classList.add("hidden");
+      $("loginScreen").classList.remove("hidden");
+      $("pin").value = "";
+      $("journal").value = "";
+    }
+
+    async function renderToday() {
+      const d = devotionalForToday();
+      $("todayDate").textContent = formattedDate();
+      $("devotionalTitle").textContent = d.title;
+      $("devotionalRef").textContent = d.reference;
+      $("devotionalTheme").textContent = d.theme;
+      $("verseText").textContent = "“" + d.verse + "”";
+      $("verseRef").textContent = d.reference;
+      $("devotionalText").innerHTML = d.devotional.map(p => `<p>${p}</p>`).join("");
+      $("reflectionText").innerHTML = d.reflection.map(p => `<p>${p}</p>`).join("");
+      $("questionText").textContent = d.question;
+      $("prayerText").textContent = d.prayer || "Senhor, fala ao meu coração e ajuda-me a viver o que aprendi hoje. Em nome de Jesus, amém.";
+
+      let savedText = "";
+      if (db && currentUserId) {
+        const { data } = await db.from("reflections")
+          .select("reflection_text")
+          .eq("user_id", currentUserId)
+          .eq("devotional_date", dateKey())
+          .maybeSingle();
+        savedText = data?.reflection_text || "";
+      }
+
+      $("journal").value = savedText;
+      $("savedStatus").classList.toggle("hidden", !savedText);
+      updateCounter();
+      await refreshRewardDisplay();
+    }
+
+    async function saveReflection() {
+      if (!currentUserId && !currentUsername) return;
+      const text = $("journal").value.trim();
+      if (!text) return showToast("Escreva uma reflexão antes de salvar.");
+      const d = devotionalForToday();
+
+      if (!db || !currentUserId) return showToast("Sem conexão com o Supabase.");
+      {
+        const { error } = await db.from("reflections").upsert({
+          user_id: currentUserId,
+          devotional_date: dateKey(),
+          reflection_text: text,
+          devotional_title: d.title,
+          bible_reference: d.reference,
+          theme: d.theme,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id,devotional_date" });
+        if (error) return showToast("Erro ao salvar: " + error.message);
+      }
+
+      $("savedStatus").classList.remove("hidden");
+      showToast("Sua reflexão foi salva.");
+    }
+
+    async function clearReflection() {
+      if (!db || !currentUserId) return showToast("Sem conexão com o Supabase.");
+      {
+        const { error } = await db.from("reflections")
+          .delete().eq("user_id", currentUserId).eq("devotional_date", dateKey());
+        if (error) return showToast("Erro ao remover: " + error.message);
+      }
+      $("journal").value = "";
+      $("savedStatus").classList.add("hidden");
+      updateCounter();
+      showToast("Reflexão removida.");
+    }
+
+    function updateCounter() { $("charCount").textContent = $("journal").value.length; }
+    function rewardForStreak(streak) { return streak * 10; }
+
+    async function getRewardState() {
+      if (!db || !currentUserId) return { streak: 0, points: 0, lastCompleted: null };
+      const { data, error } = await db.from("reward_state")
+        .select("current_streak,total_points,last_completed_date").eq("user_id", currentUserId).maybeSingle();
+      if (error) {
+        console.error("reward_state:", error);
+        return { streak: 0, points: 0, lastCompleted: null };
+      }
+      return { streak: Number(data?.current_streak || 0), points: Number(data?.total_points || 0), lastCompleted: data?.last_completed_date || null };
+    }
+
+
+    async function normalizedRewardState() {
+      const state = await getRewardState();
+      const today = dateKey();
+      if (!state.lastCompleted || state.lastCompleted === today || state.lastCompleted === yesterdayKey()) return state;
+
+      // Mostra zero imediatamente após uma quebra de sequência, mas não grava
+      // diretamente no Supabase. O reset persistente é feito pelo banco na
+      // próxima conclusão válida.
+      return { streak: 0, points: 0, lastCompleted: state.lastCompleted };
+    }
+
+    async function completedToday() {
+      if (!db || !currentUserId) return null;
+      const { data, error } = await db.from("completions")
+        .select("earned_points,streak_after_completion")
+        .eq("user_id", currentUserId)
+        .eq("devotional_date", dateKey())
+        .maybeSingle();
+      if (error) console.error("completions:", error);
+      return data ? {
+        earned: Number(data.earned_points || 0),
+        streak: Number(data.streak_after_completion || 0)
+      } : null;
+    }
+
+    async function completeDevotional() {
+      const existing = await completedToday();
+      if (existing) {
+        showToast("Você já concluiu o devocional de hoje.");
+        return refreshRewardDisplay();
+      }
+
+      const state = await normalizedRewardState();
+      const newStreak = state.lastCompleted === yesterdayKey() ? state.streak + 1 : 1;
+      const earned = rewardForStreak(newStreak);
+      if (!db || !currentUserId) return showToast("Sem conexão com o Supabase.");
+      {
+        const d = devotionalForToday();
+        const { data, error } = await db.rpc("complete_daily_devotional", {
+          p_devotional_date: dateKey(),
+          p_devotional_title: d.title
+        });
+
+        if (error) {
+          if ((error.message || "").toLowerCase().includes("já foi concluído")) {
+            showToast("Você já concluiu o devocional de hoje.");
+            return refreshRewardDisplay();
+          }
+          return showToast("Erro ao concluir: " + error.message);
+        }
+
+        const result = Array.isArray(data) ? data[0] : data;
+        const dbEarned = Number(result?.earned || earned);
+        await refreshRewardDisplay();
+        showToast(`Devocional concluído! Você ganhou ${dbEarned} pontos ✨`);
+        return;
+      }
+    }
+
+    function currentBrisbaneYMD() {
+      const p = brisbaneDateParts();
+      return { year: Number(p.year), month: Number(p.month), day: Number(p.day) };
+    }
+
+    function daysInCurrentMonth() {
+      const { year, month } = currentBrisbaneYMD();
+      return new Date(Date.UTC(year, month, 0)).getUTCDate();
+    }
+
+    async function updateThermometer(state) {
+      const now = currentBrisbaneYMD();
+      const totalDays = daysInCurrentMonth();
+      const currentDay = now.day;
+
+      // O termômetro representa a sequência válida do mês atual.
+      // Se houver quebra de sequência, normalizedRewardState() já retorna streak 0.
+      let progressDays = Math.min(state.streak, currentDay, totalDays);
+      let fullMonth = false;
+
+      // Quando o Supabase estiver ativo, também consultamos monthly_progress,
+      // criada pelo SQL mais recente. Ela confirma a conclusão integral do mês.
+      if (db && currentUserId) {
+        const { data, error } = await db.from("monthly_progress")
+          .select("completed_days,month_completed")
+          .eq("user_id", currentUserId)
+          .eq("year", now.year)
+          .eq("month", now.month)
+          .maybeSingle();
+
+        if (!error && data) {
+          fullMonth = Boolean(data.month_completed) && state.streak >= totalDays;
+        }
+      } else {
+        fullMonth = progressDays >= totalDays;
+      }
+
+      const percent = fullMonth
+        ? 100
+        : Math.max(0, Math.min(100, Math.round((progressDays / totalDays) * 100)));
+
+      $("thermometerFill").style.height = `${percent}%`;
+      $("thermoPercent").textContent = `${percent}%`;
+      $("thermoCaption").textContent = `${progressDays} de ${totalDays} dias consecutivos neste mês`;
+      $("thermometerWrap").classList.toggle("on-fire", fullMonth);
+      $("holyFireMessage").classList.toggle("hidden", !fullMonth);
+    }
+
+    async function refreshRewardDisplay() {
+      if (!currentUserId && !currentUsername) return;
+      const state = await normalizedRewardState();
+      const completion = await completedToday();
+      $("streakCount").textContent = state.streak;
+      $("rewardPoints").textContent = state.points;
+      await updateThermometer(state);
+
+      if (completion) {
+        $("rewardMessage").textContent = `Parabéns! Hoje você ganhou ${completion.earned} pontos. Volte amanhã para manter sua sequência e ganhar ainda mais.`;
+        $("completeBtn").classList.add("hidden");
+        $("completedBadge").classList.remove("hidden");
+      } else {
+        const nextStreak = state.lastCompleted === yesterdayKey() ? state.streak + 1 : 1;
+        const nextReward = rewardForStreak(nextStreak);
+        $("rewardMessage").textContent = state.streak === 0 && state.points === 0
+          ? `Finalize o devocional de hoje para começar sua sequência e ganhar ${nextReward} pontos.`
+          : `Finalize hoje para chegar a ${nextStreak} dias consecutivos e ganhar mais ${nextReward} pontos.`;
+        $("completeBtn").classList.remove("hidden");
+        $("completedBadge").classList.add("hidden");
+      }
+    }
+
+    async function showHistory() {
+      $("todayContent").classList.add("hidden");
+      $("historyContent").classList.remove("hidden");
+      document.querySelector(".topbar h2").textContent = "Suas reflexões anteriores";
+      $("todayDate").textContent = "Seu histórico pessoal";
+      await renderHistory();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showToday() {
+      $("historyContent").classList.add("hidden");
+      $("todayContent").classList.remove("hidden");
+      document.querySelector(".topbar h2").textContent = "Seu devocional de hoje";
+      $("todayDate").textContent = formattedDate();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function renderHistory() {
+      let items = [];
+      if (!db || !currentUserId) return showToast("Sem conexão com o Supabase.");
+      {
+        const { data, error } = await db.from("reflections")
+          .select("reflection_text,devotional_date,devotional_title,bible_reference,created_at,updated_at")
+          .eq("user_id", currentUserId)
+          .order("devotional_date", { ascending: false });
+        if (error) return showToast("Erro ao carregar histórico: " + error.message);
+        items = (data || []).map(r => ({
+          text: r.reflection_text,
+          date: r.devotional_date,
+          title: r.devotional_title,
+          reference: r.bible_reference,
+          savedAt: r.updated_at || r.created_at
+        }));
+      }
+
+      if (!items.length) {
+        $("historyList").innerHTML = `<div class="empty-history">Você ainda não possui reflexões salvas.<br>Depois que salvar seu primeiro devocional, ele aparecerá aqui.</div>`;
+        return;
+      }
+
+      $("historyList").innerHTML = items.map(item => {
+        const parts = item.date.split("-");
+        const localDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        const label = new Intl.DateTimeFormat("pt-BR", { day:"2-digit", month:"long", year:"numeric" }).format(localDate);
+        return `<article class="history-entry">
+          <div class="history-date">${label}</div>
+          <h5>${escapeHtml(item.title)}</h5>
+          <div class="history-reference">${escapeHtml(item.reference || "")}</div>
+          <div class="history-text">${escapeHtml(item.text)}</div>
+        </article>`;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    $("createBtn").addEventListener("click", createProfile);
+    $("enterBtn").addEventListener("click", () => login());
+    $("logoutBtn").addEventListener("click", logout);
+    $("historyBtn").addEventListener("click", showHistory);
+    $("backTodayBtn").addEventListener("click", showToday);
+    $("saveBtn").addEventListener("click", saveReflection);
+    $("clearBtn").addEventListener("click", clearReflection);
+    $("completeBtn").addEventListener("click", completeDevotional);
+    $("journal").addEventListener("input", updateCounter);
+    $("pin").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+
+    window.addEventListener("offline", () => showToast("Você está offline. A sincronização precisa de internet."));
+    window.addEventListener("online", () => showToast("Conexão restaurada."));
+
+    async function bootstrap() {
+      setBackendStatus();
+      if (!db) {
+        showToast("Não foi possível iniciar a conexão com o Supabase.");
+        return;
+      }
+      {
+        const { data } = await db.auth.getSession();
+        if (data?.session) await enterSupabaseSession(data.session);
+        db.auth.onAuthStateChange(async (event, session) => {
+          if (event === "SIGNED_IN" && session && !currentUserId) await enterSupabaseSession(session);
+          if (event === "SIGNED_OUT") {
+            currentUsername = null;
+            currentUserId = null;
+          }
+        });
+      }
+
+      // Service Worker/PWA só funciona quando hospedado em HTTP(S).
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+        navigator.serviceWorker.register("./sw.js").catch(err => console.warn("Service Worker:", err));
+      }
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
