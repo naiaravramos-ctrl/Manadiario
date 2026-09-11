@@ -633,6 +633,23 @@
       .card { padding: 20px; }
       .login-actions { flex-direction: column; }
     }
+  
+    .devotional-tabs { display:flex; gap:10px; margin:18px 0 22px; padding:6px; background:rgba(255,255,255,.68); border:1px solid var(--line); border-radius:18px; width:fit-content; max-width:100%; box-shadow:0 8px 24px rgba(70,49,34,.05); }
+    .devotional-tab { border:0; border-radius:13px; padding:11px 16px; font:inherit; font-weight:800; cursor:pointer; background:transparent; color:var(--muted); transition:.2s ease; }
+    .devotional-tab.active { background:var(--primary); color:#fff; box-shadow:0 6px 16px rgba(122,92,69,.18); }
+    .kids-hero { background:radial-gradient(circle at 85% 10%, rgba(255,255,255,.20), transparent 24%), linear-gradient(135deg, #947252, #b48a64); }
+    .kids-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:999px; background:#f7ead7; color:#7a5c45; font-size:.82rem; font-weight:800; margin-bottom:12px; }
+    .kids-step { margin-top:18px; padding:18px; border:1px solid #eadfce; border-radius:18px; background:#fffaf2; }
+    .kids-step h4 { margin:0 0 8px; }
+    .kids-step p { margin:0; line-height:1.7; }
+    .kids-question { background:#f4eadc; border-left:4px solid #a48368; }
+    .kids-activity { background:#f7f1e8; border:1px dashed #b99b7f; }
+    .parent-tip { margin-top:18px; padding:16px 18px; border-radius:16px; background:#f1ece5; color:#5f5146; line-height:1.65; }
+    .kids-prayer { margin-top:18px; padding:20px; border-radius:18px; background:linear-gradient(135deg,#f3e7d7,#ead8c2); color:#3f3027; border:1px solid #d8c1a7; }
+    .kids-prayer h4 { color:#4a3428; margin-top:0; }
+    .kids-prayer p { margin-bottom:0; line-height:1.75; font-family:Georgia, "Times New Roman", serif; font-size:1.05rem; color:#2f241e; font-weight:600; }
+    @media (max-width:640px) { .devotional-tabs{width:100%;} .devotional-tab{flex:1;padding:10px 9px;font-size:.92rem;} }
+
   </style>
 </head>
 <body>
@@ -687,6 +704,12 @@
         <button class="secondary-btn" id="historyBtn">Minhas reflexões</button>
         <button class="ghost-btn" id="logoutBtn">Sair</button>
       </div>
+    </div>
+
+
+    <div class="devotional-tabs" role="tablist" aria-label="Tipo de devocional">
+      <button class="devotional-tab active" id="adultTabBtn" type="button" role="tab" aria-selected="true">📖 Meu devocional</button>
+      <button class="devotional-tab" id="kidsTabBtn" type="button" role="tab" aria-selected="false">👨‍👩‍👧 Com meu filho(a)</button>
     </div>
 
     <div id="todayContent">
@@ -796,6 +819,25 @@
         <div id="completedBadge" class="completed-badge hidden">✓ Devocional de hoje concluído</div>
       </section>
     </div>
+
+
+    <section id="kidsContent" class="hidden">
+      <section class="hero-card kids-hero">
+        <div class="eyebrow">🌈 DEVOCIONAL INFANTIL DO DIA</div>
+        <h3 id="kidsTitle"></h3>
+        <div class="hero-meta"><span id="kidsRef"></span><span>•</span><span>Para fazer em família</span></div>
+      </section>
+      <section class="card">
+        <div class="kids-badge">🧒 Para crianças de 4 a 12 anos</div>
+        <h4>📖 Versículo-chave</h4>
+        <blockquote><span id="kidsVerse"></span><span id="kidsVerseRef"></span></blockquote>
+        <div class="kids-step"><h4>💛 Entendendo juntos</h4><div id="kidsExplanation"></div></div>
+        <div class="kids-step kids-question"><h4>💬 Converse com seu filho(a)</h4><p id="kidsQuestion"></p></div>
+        <div class="kids-step kids-activity"><h4>🎨 Missão de hoje</h4><p id="kidsActivity"></p></div>
+        <div class="parent-tip"><strong>👨‍👩‍👧 Dica para os pais:</strong><span id="kidsParentTip"></span></div>
+        <div class="kids-prayer"><h4>🙏 Orem juntos</h4><p id="kidsPrayer"></p></div>
+      </section>
+    </section>
 
     <section id="historyContent" class="hidden">
       <section class="card">
@@ -933,6 +975,17 @@
         question: "O que você gostaria de colocar diante de Deus e começar novamente?",
         prayer: "Senhor, obrigado porque Tuas misericórdias se renovam a cada manhã. Entrego a Ti meus erros, frustrações e arrependimentos. Dá-me coragem para recomeçar com sabedoria, humildade e esperança. Que hoje seja um novo passo contigo. Em nome de Jesus, amém.",
       }
+    ];
+
+
+    const childDevotionals = [
+      { title:"Deus está sempre com você", reference:"Isaías 41:10", verse:"Não tenha medo. Deus está com você e cuida de você.", explanation:["Às vezes sentimos medo: de ficar sozinho, de tentar algo novo, de ir à escola ou de alguma coisa dar errado.","A Bíblia nos ensina que Deus não vai embora quando sentimos medo. Podemos conversar com Ele e lembrar: eu não estou sozinho."], question:"Quando você sente medo, o que pode fazer para lembrar que Deus está perto?", activity:"Desenhem juntos algo que deixa a criança com medo. Depois, desenhem ao lado um coração e escrevam: “Deus está comigo”.", parentTip:"Não corrija a resposta da criança rapidamente. Escute primeiro e ajude-a a colocar o sentimento em palavras.", prayer:"Jesus, obrigado porque Tu estás comigo. Quando eu sentir medo, ajuda-me a lembrar que posso falar contigo. Cuida de mim e da minha família. Amém." },
+      { title:"Jesus ensina a amar", reference:"João 13:34", verse:"Jesus quer que a gente ame as pessoas assim como Ele nos ama.", explanation:["Amar não é somente falar ‘eu te amo’. Também mostramos amor quando dividimos, ajudamos, pedimos desculpas e tratamos os outros com carinho.","Jesus nos ama todos os dias e nos ensina a levar esse amor para nossa casa, escola e amigos."], question:"Qual atitude de amor você pode fazer por alguém hoje?", activity:"Escolham uma pessoa e façam uma pequena surpresa: um desenho, um abraço, uma ajuda ou uma mensagem carinhosa.", parentTip:"Ajude a criança a escolher uma atitude pequena e possível de realizar ainda hoje.", prayer:"Jesus, obrigado porque Tu me amas. Ensina-me a amar minha família, meus amigos e as pessoas ao meu redor. Ajuda-me a demonstrar amor com minhas atitudes. Amém." },
+      { title:"Fale com Deus sobre tudo", reference:"Filipenses 4:6", verse:"Quando estiver preocupado, converse com Deus e peça ajuda.", explanation:["Você pode falar com Deus quando está feliz, triste, bravo, preocupado ou animado. Não existe assunto pequeno demais para Ele.","Orar é conversar com Deus. Você não precisa usar palavras difíceis. Pode falar do seu jeito."], question:"Se você pudesse contar uma coisa para Deus agora, o que contaria?", activity:"Façam uma oração de três partes: primeiro agradeçam, depois contem algo que estão sentindo e, por último, façam um pedido.", parentTip:"Deixe a criança orar com as próprias palavras, mesmo que seja uma oração de apenas uma frase.", prayer:"Deus, obrigado porque eu posso conversar contigo. Tu conheces meu coração e sabes do que eu preciso. Ajuda-me hoje e fica perto de mim. Amém." },
+      { title:"Aprenda a perdoar", reference:"Efésios 4:32", verse:"Sejam bondosos e aprendam a perdoar uns aos outros.", explanation:["Às vezes alguém faz algo que machuca nossos sentimentos. Podemos ficar tristes ou bravos, e Deus entende isso.","Perdoar é escolher não guardar a raiva para sempre. Também precisamos aprender a pedir desculpas quando nós erramos."], question:"Você precisa pedir desculpas para alguém ou perdoar alguém hoje?", activity:"Treinem juntos duas frases importantes: ‘Me desculpa pelo que eu fiz’ e ‘Eu escolho te perdoar’.", parentTip:"Não force reconciliação imediata em situações sérias. O objetivo é ensinar arrependimento, graça e limites saudáveis.", prayer:"Jesus, ajuda-me a ter um coração bondoso. Ensina-me a pedir desculpas quando eu errar e a perdoar quando alguém me machucar. Amém." },
+      { title:"Você foi criado com propósito", reference:"Salmos 139:14", verse:"Deus fez você de uma maneira especial e maravilhosa.", explanation:["Deus fez cada pessoa diferente. Algumas pessoas desenham bem, outras gostam de esportes, outras são boas em ajudar ou fazer amigos.","Você não precisa ser igual a ninguém. Deus conhece você e pode usar suas qualidades para fazer coisas boas."], question:"Qual é uma coisa legal que Deus colocou em você?", activity:"Façam uma lista com três qualidades da criança. Depois escolham uma delas para usar ajudando alguém hoje.", parentTip:"Valorize também qualidades de caráter, como gentileza, coragem, esforço e sinceridade, não apenas talentos.", prayer:"Deus, obrigado porque Tu me criaste com amor. Ajuda-me a gostar de quem eu sou e a usar minhas qualidades para fazer o bem. Amém." },
+      { title:"Seja corajoso para fazer o que é certo", reference:"Josué 1:9", verse:"Seja forte e corajoso, porque Deus está com você.", explanation:["Coragem não significa nunca sentir medo. Coragem é fazer o que é certo mesmo quando estamos com um pouco de medo.","Podemos ser corajosos quando falamos a verdade, defendemos alguém, pedimos ajuda ou tentamos novamente depois de errar."], question:"Em que situação você precisa ser corajoso hoje?", activity:"Façam juntos uma pose de coragem e digam em voz alta: ‘Com Deus, eu posso fazer o que é certo’.", parentTip:"Ajude a criança a diferenciar coragem de imprudência. Pedir ajuda a um adulto também é uma atitude corajosa.", prayer:"Deus, dá-me coragem para fazer o que é certo. Quando eu sentir medo, ajuda-me a lembrar que Tu estás comigo. Amém." },
+      { title:"Um coração agradecido", reference:"1 Tessalonicenses 5:18", verse:"Agradeça a Deus pelas coisas boas que Ele colocou no seu dia.", explanation:["Nem todos os dias são perfeitos, mas sempre podemos procurar alguma coisa pela qual agradecer.","Quando aprendemos a agradecer, começamos a perceber presentes que antes pareciam pequenos: nossa família, comida, amigos, saúde, brincadeiras e cuidado."], question:"Quais são três coisas pelas quais você quer agradecer hoje?", activity:"Criem o ‘pote da gratidão’. Escrevam ou desenhem uma coisa boa do dia em um papel e coloquem no pote.", parentTip:"Participe também. Quando os pais agradecem em voz alta, as crianças aprendem gratidão pelo exemplo.", prayer:"Deus, obrigado por cuidar de mim. Obrigado pela minha família e pelas coisas boas que Tu me deste hoje. Ajuda-me a ter um coração agradecido. Amém." }
     ];
 
     const $ = id => document.getElementById(id);
@@ -1110,7 +1163,9 @@
       $("currentUser").textContent = currentUsername;
       $("loginScreen").classList.add("hidden");
       $("app").classList.remove("hidden");
+      setActiveDevotionalTab("adult");
       renderToday();
+      renderKidsToday();
     }
 
     async function logout() {
@@ -1151,6 +1206,59 @@
       $("savedStatus").classList.toggle("hidden", !savedText);
       updateCounter();
       await refreshRewardDisplay();
+    }
+
+
+    function childDevotionalForToday() {
+      const { year, month, day } = currentBrisbaneYMD();
+      const start = Date.UTC(2026, 0, 1);
+      const today = Date.UTC(year, month - 1, day);
+      const dayNumber = Math.floor((today - start) / 86400000);
+      return childDevotionals[((dayNumber % childDevotionals.length) + childDevotionals.length) % childDevotionals.length];
+    }
+
+    function renderKidsToday() {
+      const d = childDevotionalForToday();
+      $("kidsTitle").textContent = d.title;
+      $("kidsRef").textContent = d.reference;
+      $("kidsVerse").textContent = "“" + d.verse + "”";
+      $("kidsVerseRef").textContent = d.reference;
+      $("kidsExplanation").innerHTML = d.explanation.map(p => `<p>${escapeHtml(p)}</p>`).join("");
+      $("kidsQuestion").textContent = d.question;
+      $("kidsActivity").textContent = d.activity;
+      $("kidsParentTip").textContent = " " + d.parentTip;
+      $("kidsPrayer").textContent = d.prayer;
+    }
+
+    function setActiveDevotionalTab(mode) {
+      const adult = mode === "adult";
+      $("adultTabBtn").classList.toggle("active", adult);
+      $("kidsTabBtn").classList.toggle("active", !adult);
+      $("adultTabBtn").setAttribute("aria-selected", String(adult));
+      $("kidsTabBtn").setAttribute("aria-selected", String(!adult));
+    }
+
+    function showAdultDevotional() {
+      $("historyContent").classList.add("hidden");
+      $("kidsContent").classList.add("hidden");
+      $("todayContent").classList.remove("hidden");
+      setActiveDevotionalTab("adult");
+      document.querySelector(".topbar h2").textContent = "Seu devocional de hoje";
+      $("todayDate").textContent = formattedDate();
+      $("historyBtn").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showKidsDevotional() {
+      $("historyContent").classList.add("hidden");
+      $("todayContent").classList.add("hidden");
+      $("kidsContent").classList.remove("hidden");
+      setActiveDevotionalTab("kids");
+      renderKidsToday();
+      document.querySelector(".topbar h2").textContent = "Devocional com meu filho(a)";
+      $("todayDate").textContent = formattedDate();
+      $("historyBtn").classList.add("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     async function saveReflection() {
@@ -1337,19 +1445,18 @@
 
     async function showHistory() {
       $("todayContent").classList.add("hidden");
+      $("kidsContent").classList.add("hidden");
       $("historyContent").classList.remove("hidden");
+      setActiveDevotionalTab("adult");
       document.querySelector(".topbar h2").textContent = "Suas reflexões anteriores";
       $("todayDate").textContent = "Seu histórico pessoal";
+      $("historyBtn").classList.add("hidden");
       await renderHistory();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function showToday() {
-      $("historyContent").classList.add("hidden");
-      $("todayContent").classList.remove("hidden");
-      document.querySelector(".topbar h2").textContent = "Seu devocional de hoje";
-      $("todayDate").textContent = formattedDate();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      showAdultDevotional();
     }
 
     async function renderHistory() {
@@ -1403,6 +1510,8 @@
     $("enterBtn").addEventListener("click", () => login());
     $("logoutBtn").addEventListener("click", logout);
     $("historyBtn").addEventListener("click", showHistory);
+    $("adultTabBtn").addEventListener("click", showAdultDevotional);
+    $("kidsTabBtn").addEventListener("click", showKidsDevotional);
     $("backTodayBtn").addEventListener("click", showToday);
     $("saveBtn").addEventListener("click", saveReflection);
     $("clearBtn").addEventListener("click", clearReflection);
