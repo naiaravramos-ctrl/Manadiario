@@ -648,6 +648,27 @@
     .kids-prayer { margin-top:18px; padding:20px; border-radius:18px; background:linear-gradient(135deg,#f3e7d7,#ead8c2); color:#3f3027; border:1px solid #d8c1a7; }
     .kids-prayer h4 { color:#4a3428; margin-top:0; }
     .kids-prayer p { margin-bottom:0; line-height:1.75; font-family:Georgia, "Times New Roman", serif; font-size:1.05rem; color:#2f241e; font-weight:600; }
+    .kids-reward-card { margin-top:20px; overflow:hidden; position:relative; background:linear-gradient(180deg,#fffdf8 0%,#fff8eb 100%); }
+    .kids-reward-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+    .kids-reward-title { margin:0 0 6px; font-size:1.25rem; color:#4a3428; }
+    .kids-reward-copy { margin:0; color:#6b5a4d; line-height:1.55; max-width:620px; }
+    .kids-puzzle-count { display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:999px; background:#f3e4c9; color:#6a4c31; font-weight:900; white-space:nowrap; }
+    .kids-puzzle-stage { margin-top:18px; padding:12px; border-radius:22px; background:#e9dcc8; box-shadow:inset 0 0 0 1px rgba(90,64,42,.08); }
+    .kids-puzzle-grid { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(2,minmax(92px,1fr)); aspect-ratio:2/1; gap:5px; border-radius:16px; overflow:hidden; background:#d7c4a9; }
+    .kids-puzzle-piece { position:relative; min-width:0; min-height:0; background-repeat:no-repeat; transition:transform .25s ease,filter .25s ease; }
+    .kids-puzzle-piece.unlocked { filter:saturate(1.05); }
+    .kids-puzzle-piece.unlocked::after { content:""; position:absolute; inset:0; border:1px solid rgba(255,255,255,.48); pointer-events:none; }
+    .kids-puzzle-piece.locked { display:grid; place-items:center; background:linear-gradient(145deg,#d8c8b4,#c9b398); color:#fffaf2; font-size:1.55rem; font-weight:1000; text-shadow:0 1px 1px rgba(0,0,0,.15); }
+    .kids-puzzle-piece.locked::before { content:"?"; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.30); }
+    .kids-puzzle-bonus { display:grid; place-items:center; background:linear-gradient(145deg,#f7e5ac,#e9bd60); color:#6e4b17; font-size:1.6rem; }
+    .kids-puzzle-meta { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+    .kids-puzzle-theme { font-weight:900; color:#4a3428; }
+    .kids-puzzle-message { margin:5px 0 0; color:#756556; line-height:1.5; }
+    .kids-complete-btn { margin-top:16px; width:100%; min-height:50px; font-weight:900; }
+    .kids-complete-btn:disabled { cursor:default; opacity:.72; }
+    .kids-puzzle-celebration { margin-top:14px; padding:14px 16px; border-radius:16px; background:linear-gradient(135deg,#fff1b8,#f7d57b); color:#5e4218; font-weight:900; text-align:center; animation:kidsCelebrate .6s ease both; }
+    @keyframes kidsCelebrate { from { transform:scale(.96); opacity:0; } to { transform:scale(1); opacity:1; } }
+    @media (max-width:640px) { .kids-puzzle-grid{grid-template-rows:repeat(2,minmax(68px,1fr));gap:3px}.kids-puzzle-stage{padding:8px}.kids-puzzle-piece.locked::before{width:30px;height:30px}.kids-reward-head{display:block}.kids-puzzle-count{margin-top:10px} }
     @media (max-width:640px) { .devotional-tabs{width:100%;} .devotional-tab{flex:1;padding:10px 9px;font-size:.92rem;} }
 
   </style>
@@ -837,6 +858,29 @@
         <div class="parent-tip"><strong>👨‍👩‍👧 Dica para os pais:</strong><span id="kidsParentTip"></span></div>
         <div class="kids-prayer"><h4>🙏 Orem juntos</h4><p id="kidsPrayer"></p></div>
       </section>
+
+      <section class="card kids-reward-card" id="kidsRewardCard">
+        <div class="kids-reward-head">
+          <div>
+            <div class="kids-badge">🧩 RECOMPENSA DA CRIANÇA</div>
+            <h4 class="kids-reward-title">Meu Quebra-Cabeça Bíblico</h4>
+            <p class="kids-reward-copy">Cada dia que a criança finalizar o devocional infantil, ela encontra uma nova peça. Esta recompensa é separada dos pontos e da sequência do adulto.</p>
+          </div>
+          <div class="kids-puzzle-count" id="kidsPuzzleCount">0 de 7 peças</div>
+        </div>
+        <div class="kids-puzzle-stage" aria-label="Quebra-cabeça bíblico">
+          <div class="kids-puzzle-grid" id="kidsPuzzleGrid"></div>
+        </div>
+        <div class="kids-puzzle-meta">
+          <div>
+            <div class="kids-puzzle-theme" id="kidsPuzzleTheme">Carregando aventura...</div>
+            <p class="kids-puzzle-message" id="kidsPuzzleMessage">Finalize o devocional de hoje para encontrar uma peça.</p>
+          </div>
+          <div class="kids-badge" id="kidsPuzzlesCompleted">🏆 0 completos</div>
+        </div>
+        <div id="kidsPuzzleCelebration" class="kids-puzzle-celebration hidden"></div>
+        <button class="primary-btn kids-complete-btn" id="completeKidsBtn" type="button">🧩 Finalizar e ganhar minha peça</button>
+      </section>
     </section>
 
     <section id="historyContent" class="hidden">
@@ -978,6 +1022,30 @@
     ];
 
 
+    const KIDS_PUZZLE_PIECES = 7;
+    const kidsPuzzleThemes = [
+      { title:"A Arca de Noé", teaser:"Uma aventura com animais e um arco-íris!", scene:"noah" },
+      { title:"Davi e Golias", teaser:"Coragem, uma pedra e uma grande vitória!", scene:"david" },
+      { title:"Daniel e os Leões", teaser:"Uma noite na cova dos leões!", scene:"daniel" },
+      { title:"Jonas e o Grande Peixe", teaser:"Uma aventura no fundo do mar!", scene:"jonah" },
+      { title:"Jesus acalma a tempestade", teaser:"Um barco, ondas enormes e Jesus!", scene:"storm" },
+      { title:"A Criação", teaser:"Descubra as maravilhas que Deus criou!", scene:"creation" },
+      { title:"Jesus e as Crianças", teaser:"Uma história cheia de amor e alegria!", scene:"children" }
+    ];
+
+    function kidsPuzzleSvg(scene) {
+      const scenes = {
+        noah: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><defs><linearGradient id="s" x2="0" y2="1"><stop stop-color="#7fd2ff"/><stop offset="1" stop-color="#e9f7ff"/></linearGradient></defs><rect width="800" height="400" fill="url(#s)"/><circle cx="690" cy="70" r="42" fill="#ffd968"/><path d="M55 160 Q180 30 305 160" fill="none" stroke="#f46b63" stroke-width="18"/><path d="M70 163 Q180 55 290 163" fill="none" stroke="#f6b94b" stroke-width="16"/><path d="M86 165 Q180 78 275 165" fill="none" stroke="#78b66f" stroke-width="14"/><path d="M105 170 Q180 98 258 170" fill="none" stroke="#648ed6" stroke-width="12"/><path d="M230 245 L570 245 L520 330 L280 330 Z" fill="#9b6038"/><rect x="315" y="160" width="175" height="95" rx="12" fill="#bd7a47"/><path d="M295 170 L403 105 L510 170" fill="#7e4c31"/><text x="345" y="220" font-size="50">🦒 🐘</text><path d="M0 330 Q120 300 240 330 T480 330 T800 330 V400 H0Z" fill="#55a9d3"/></svg>`,
+        david: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="#f8cf82"/><circle cx="680" cy="70" r="42" fill="#fff2a4"/><path d="M0 300 Q170 180 350 300 T800 290 V400 H0Z" fill="#9bc36e"/><path d="M0 335 Q180 255 360 335 T800 330 V400 H0Z" fill="#6d9e56"/><circle cx="250" cy="210" r="24" fill="#8c5a39"/><rect x="236" y="232" width="28" height="68" rx="12" fill="#4c79b8"/><path d="M250 255 Q315 210 350 175" stroke="#70503a" stroke-width="7" fill="none"/><circle cx="355" cy="170" r="10" fill="#777"/><circle cx="575" cy="145" r="38" fill="#72503c"/><rect x="540" y="180" width="70" height="135" rx="22" fill="#6b6b74"/><text x="80" y="90" font-size="48" font-family="sans-serif" font-weight="700" fill="#6b4b2b">CORAGEM!</text></svg>`,
+        daniel: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="#312e3b"/><path d="M0 80 Q120 15 230 80 T460 75 T800 90 V400 H0Z" fill="#4c4655"/><circle cx="400" cy="90" r="50" fill="#f8da84" opacity=".9"/><text x="100" y="285" font-size="95">🦁</text><text x="560" y="285" font-size="95">🦁</text><circle cx="400" cy="195" r="25" fill="#b87a53"/><rect x="375" y="220" width="50" height="100" rx="18" fill="#6b84b9"/><path d="M340 245 Q400 205 460 245" stroke="#d4b69a" stroke-width="12" fill="none"/><text x="285" y="365" font-size="34" fill="#fff3c4" font-family="sans-serif" font-weight="700">DEUS ESTÁ PERTO</text></svg>`,
+        jonah: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><defs><linearGradient id="o" y2="1"><stop stop-color="#77d8ee"/><stop offset="1" stop-color="#126a9a"/></linearGradient></defs><rect width="800" height="400" fill="url(#o)"/><circle cx="120" cy="75" r="38" fill="#ffe184"/><path d="M0 170 Q100 130 200 170 T400 170 T600 170 T800 170 V400 H0Z" fill="#1686b2" opacity=".9"/><path d="M215 250 Q390 125 595 235 Q650 270 590 300 Q390 365 220 292 Q180 272 215 250Z" fill="#416b88"/><path d="M590 245 Q665 210 705 235 Q660 265 600 275" fill="#416b88"/><circle cx="525" cy="230" r="7" fill="#fff"/><circle cx="527" cy="230" r="3"/><path d="M245 210 Q220 150 255 118" stroke="#9fe9ff" stroke-width="9" fill="none"/><text x="80" y="355" font-size="38" fill="#eaffff" font-family="sans-serif" font-weight="700">UMA GRANDE AVENTURA!</text></svg>`,
+        storm: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><defs><linearGradient id="n" y2="1"><stop stop-color="#253e68"/><stop offset="1" stop-color="#6c93b8"/></linearGradient></defs><rect width="800" height="400" fill="url(#n)"/><path d="M0 275 Q80 225 160 275 T320 275 T480 275 T640 275 T800 275 V400 H0Z" fill="#1d6a98"/><path d="M260 270 L560 270 L515 330 L305 330Z" fill="#9a633b"/><path d="M395 135 V270" stroke="#ead7b0" stroke-width="8"/><path d="M405 150 L510 235 L405 235Z" fill="#f0e4c5"/><circle cx="350" cy="235" r="18" fill="#c28a62"/><circle cx="430" cy="235" r="18" fill="#c28a62"/><path d="M55 80 L120 80 M90 50 L90 110" stroke="#d7e8ff" stroke-width="12" stroke-linecap="round" opacity=".8"/><text x="540" y="95" font-size="34" fill="#fff" font-family="sans-serif" font-weight="700">NÃO TENHA MEDO</text></svg>`,
+        creation: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="#9edcff"/><circle cx="680" cy="80" r="48" fill="#ffd85c"/><path d="M0 290 Q160 180 320 290 T650 285 T800 260 V400 H0Z" fill="#78b95e"/><path d="M0 330 Q150 260 320 330 T650 325 T800 310 V400 H0Z" fill="#529b50"/><rect x="120" y="210" width="22" height="105" fill="#76513b"/><circle cx="130" cy="190" r="70" fill="#4f9f55"/><circle cx="175" cy="210" r="55" fill="#65af62"/><text x="300" y="170" font-size="65">🦋 🐦</text><text x="300" y="250" font-size="65">🌻 🐇</text><text x="305" y="350" font-size="38" fill="#fff" font-family="sans-serif" font-weight="700">DEUS CRIOU TUDO!</text></svg>`,
+        children: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="#ffd7c9"/><circle cx="400" cy="145" r="45" fill="#c8875e"/><path d="M345 190 Q400 160 455 190 L485 320 H315Z" fill="#e9f0ef"/><path d="M365 150 Q400 110 435 150" fill="#6e4c35"/><circle cx="220" cy="215" r="30" fill="#b87452"/><rect x="192" y="245" width="56" height="85" rx="20" fill="#75a5dc"/><circle cx="580" cy="215" r="30" fill="#d39a73"/><rect x="552" y="245" width="56" height="85" rx="20" fill="#e58ba5"/><text x="95" y="100" font-size="58">❤</text><text x="620" y="100" font-size="58">❤</text><text x="225" y="370" font-size="34" fill="#754a3b" font-family="sans-serif" font-weight="700">JESUS AMA AS CRIANÇAS</text></svg>`
+      };
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(scenes[scene] || scenes.noah)}`;
+    }
+
     const childDevotionals = [
       { title:"Deus está sempre com você", reference:"Isaías 41:10", verse:"Não tenha medo. Deus está com você e cuida de você.", explanation:["Às vezes sentimos medo: de ficar sozinho, de tentar algo novo, de ir à escola ou de alguma coisa dar errado.","A Bíblia nos ensina que Deus não vai embora quando sentimos medo. Podemos conversar com Ele e lembrar: eu não estou sozinho."], question:"Quando você sente medo, o que pode fazer para lembrar que Deus está perto?", activity:"Desenhem juntos algo que deixa a criança com medo. Depois, desenhem ao lado um coração e escrevam: “Deus está comigo”.", parentTip:"Não corrija a resposta da criança rapidamente. Escute primeiro e ajude-a a colocar o sentimento em palavras.", prayer:"Jesus, obrigado porque Tu estás comigo. Quando eu sentir medo, ajuda-me a lembrar que posso falar contigo. Cuida de mim e da minha família. Amém." },
       { title:"Jesus ensina a amar", reference:"João 13:34", verse:"Jesus quer que a gente ame as pessoas assim como Ele nos ama.", explanation:["Amar não é somente falar ‘eu te amo’. Também mostramos amor quando dividimos, ajudamos, pedimos desculpas e tratamos os outros com carinho.","Jesus nos ama todos os dias e nos ensina a levar esse amor para nossa casa, escola e amigos."], question:"Qual atitude de amor você pode fazer por alguém hoje?", activity:"Escolham uma pessoa e façam uma pequena surpresa: um desenho, um abraço, uma ajuda ou uma mensagem carinhosa.", parentTip:"Ajude a criança a escolher uma atitude pequena e possível de realizar ainda hoje.", prayer:"Jesus, obrigado porque Tu me amas. Ensina-me a amar minha família, meus amigos e as pessoas ao meu redor. Ajuda-me a demonstrar amor com minhas atitudes. Amém." },
@@ -1112,7 +1180,9 @@
         "reflections",
         "completions",
         "reward_state",
-        "monthly_progress"
+        "monthly_progress",
+        "child_puzzle_state",
+        "child_devotional_completions"
       ];
       const missing = [];
 
@@ -1217,7 +1287,108 @@
       return childDevotionals[((dayNumber % childDevotionals.length) + childDevotionals.length) % childDevotionals.length];
     }
 
-    function renderKidsToday() {
+    async function getKidsPuzzleState() {
+      if (!db || !currentUserId) return { puzzleIndex:0, pieces:0, puzzlesCompleted:0, lastCompleted:null };
+      const { data, error } = await db.from("child_puzzle_state")
+        .select("puzzle_index,pieces_collected,puzzles_completed,last_completed_date")
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      if (error) {
+        console.error("child_puzzle_state:", error);
+        return { puzzleIndex:0, pieces:0, puzzlesCompleted:0, lastCompleted:null };
+      }
+      return {
+        puzzleIndex:Number(data?.puzzle_index || 0),
+        pieces:Number(data?.pieces_collected || 0),
+        puzzlesCompleted:Number(data?.puzzles_completed || 0),
+        lastCompleted:data?.last_completed_date || null
+      };
+    }
+
+    async function completedKidsToday() {
+      if (!db || !currentUserId) return false;
+      const { data, error } = await db.from("child_devotional_completions")
+        .select("id")
+        .eq("user_id", currentUserId)
+        .eq("devotional_date", dateKey())
+        .maybeSingle();
+      if (error) console.error("child_devotional_completions:", error);
+      return !!data;
+    }
+
+    function renderKidsPuzzlePieces(theme, pieces) {
+      const grid = $("kidsPuzzleGrid");
+      if (!grid) return;
+      const bg = kidsPuzzleSvg(theme.scene);
+      const positions = [
+        [0,0],[33.333,0],[66.666,0],[100,0],
+        [0,100],[33.333,100],[66.666,100]
+      ];
+      grid.innerHTML = positions.map((pos, i) => {
+        const unlocked = i < pieces;
+        const style = unlocked ? `background-image:url("${bg}");background-size:400% 200%;background-position:${pos[0]}% ${pos[1]}%;` : "";
+        return `<div class="kids-puzzle-piece ${unlocked ? "unlocked" : "locked"}" style='${style}' aria-label="Peça ${i+1} ${unlocked ? "encontrada" : "a encontrar"}"></div>`;
+      }).join("") + `<div class="kids-puzzle-bonus" aria-hidden="true">⭐</div>`;
+    }
+
+    async function refreshKidsPuzzle() {
+      const state = await getKidsPuzzleState();
+      const theme = kidsPuzzleThemes[((state.puzzleIndex % kidsPuzzleThemes.length) + kidsPuzzleThemes.length) % kidsPuzzleThemes.length];
+      const pieces = Math.min(KIDS_PUZZLE_PIECES, Math.max(0, state.pieces));
+      const doneToday = await completedKidsToday();
+
+      $("kidsPuzzleTheme").textContent = `🧩 ${theme.title}`;
+      $("kidsPuzzleCount").textContent = `${pieces} de ${KIDS_PUZZLE_PIECES} peças`;
+      $("kidsPuzzlesCompleted").textContent = `🏆 ${state.puzzlesCompleted} ${state.puzzlesCompleted === 1 ? "completo" : "completos"}`;
+      renderKidsPuzzlePieces(theme, pieces);
+
+      const btn = $("completeKidsBtn");
+      btn.disabled = doneToday;
+      btn.textContent = doneToday ? "✓ Peça de hoje já encontrada" : "🧩 Finalizar e ganhar minha peça";
+
+      if (pieces >= KIDS_PUZZLE_PIECES) {
+        $("kidsPuzzleMessage").textContent = "Você montou esta aventura! No próximo devocional concluído, um novo quebra-cabeça começa.";
+      } else if (doneToday) {
+        $("kidsPuzzleMessage").textContent = `${theme.teaser} Volte amanhã para procurar a próxima peça!`;
+      } else {
+        $("kidsPuzzleMessage").textContent = `${theme.teaser} Finalize o devocional de hoje para encontrar uma peça.`;
+      }
+    }
+
+    async function completeKidsDevotional() {
+      if (!db || !currentUserId) return showToast("Sem conexão com o Supabase.");
+      if (await completedKidsToday()) {
+        showToast("A criança já ganhou a peça de hoje.");
+        return refreshKidsPuzzle();
+      }
+
+      const { data, error } = await db.rpc("complete_child_devotional", {
+        p_devotional_date: dateKey()
+      });
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("já foi concluído") || msg.includes("already")) {
+          showToast("A criança já ganhou a peça de hoje.");
+          return refreshKidsPuzzle();
+        }
+        return showToast("Erro ao liberar a peça: " + error.message);
+      }
+
+      const result = Array.isArray(data) ? data[0] : data;
+      if (result?.puzzle_completed) {
+        const finishedTheme = kidsPuzzleThemes[Number(result.puzzle_index || 0) % kidsPuzzleThemes.length];
+        const box = $("kidsPuzzleCelebration");
+        box.textContent = `🎉 Parabéns! Você completou “${finishedTheme.title}”! Uma nova aventura bíblica começa no próximo devocional.`;
+        box.classList.remove("hidden");
+        showToast("🎉 Quebra-cabeça completo!");
+      } else {
+        $("kidsPuzzleCelebration").classList.add("hidden");
+        showToast(`🧩 Nova peça encontrada! ${Number(result?.pieces_collected || 1)} de ${KIDS_PUZZLE_PIECES}.`);
+      }
+      await refreshKidsPuzzle();
+    }
+
+    async function renderKidsToday() {
       const d = childDevotionalForToday();
       $("kidsTitle").textContent = d.title;
       $("kidsRef").textContent = d.reference;
@@ -1228,6 +1399,8 @@
       $("kidsActivity").textContent = d.activity;
       $("kidsParentTip").textContent = " " + d.parentTip;
       $("kidsPrayer").textContent = d.prayer;
+      $("kidsPuzzleCelebration").classList.add("hidden");
+      await refreshKidsPuzzle();
     }
 
     function setActiveDevotionalTab(mode) {
@@ -1512,6 +1685,7 @@
     $("historyBtn").addEventListener("click", showHistory);
     $("adultTabBtn").addEventListener("click", showAdultDevotional);
     $("kidsTabBtn").addEventListener("click", showKidsDevotional);
+    $("completeKidsBtn").addEventListener("click", completeKidsDevotional);
     $("backTodayBtn").addEventListener("click", showToday);
     $("saveBtn").addEventListener("click", saveReflection);
     $("clearBtn").addEventListener("click", clearReflection);
