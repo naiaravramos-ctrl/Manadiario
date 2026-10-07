@@ -17974,9 +17974,15 @@
       const start = Date.UTC(2026, 0, 1);
       const today = Date.UTC(year, month - 1, day);
       const dayNumber = Math.floor((today - start) / 86400000);
-      // Catálogo de 1.000 devocionais: nenhum devocional exato se repete antes de completar todo o ciclo.
-      // Isso garante uma distância de 1.000 dias entre repetições (bem acima dos 300 solicitados).
-      const index = ((dayNumber % 1000) + 1000) % 1000;
+      // Os 1.000 devocionais foram criados em 10 estilos narrativos x 100 temas.
+      // Antes, o índice sequencial fazia o mesmo estilo aparecer por muitos dias seguidos.
+      // Agora alternamos o estilo diariamente e usamos uma permutação dos temas.
+      // A fórmula percorre os 1.000 itens sem repetir nenhum deles antes do ciclo completo.
+      const cycleDay = ((dayNumber % 1000) + 1000) % 1000;
+      const styleIndex = cycleDay % 10;
+      const block = Math.floor(cycleDay / 10);
+      const themeIndex = (73 * block + 37 * styleIndex) % 100;
+      const index = styleIndex * 100 + themeIndex;
       return devotionals[index];
     }
 
