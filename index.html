@@ -256,6 +256,12 @@
       font-size: 15px;
     }
 
+
+    .verse-idea { background: var(--surface-2); border-radius: 14px; padding: 18px 20px; margin: 14px 0 22px; }
+    .verse-idea strong, .verse-reading > strong { display: block; font-size: 14px; letter-spacing: .03em; margin-bottom: 8px; }
+    .verse-idea p { margin: 0; }
+    .verse-reading .verse-note { font-size: 13px; line-height: 1.5; color: var(--muted); }
+
     .question-box {
       background: linear-gradient(135deg, #efe4d5, #f7f0e8);
       border-radius: 18px;
@@ -746,11 +752,18 @@
 
       <section class="card">
         <h4>Versículo do dia</h4>
-        <p class="verse-note">Texto bíblico: João Ferreira de Almeida (tradução tradicional).</p>
-        <blockquote>
-          <span id="verseText"></span>
-          <span id="verseRef"></span>
-        </blockquote>
+        <div class="verse-idea" aria-label="Ideia central">
+          <strong>💡 Ideia central</strong>
+          <p id="verseIdea"></p>
+        </div>
+        <div class="verse-reading">
+          <strong>📖 Leitura bíblica</strong>
+          <p class="verse-note">Texto bíblico de João Ferreira de Almeida. A NTLH será utilizada somente após integração com uma fonte autorizada.</p>
+          <blockquote>
+            <span id="verseText"></span>
+            <span id="verseRef"></span>
+          </blockquote>
+        </div>
 
         <h4>Devocional</h4>
         <div id="devotionalText"></div>
@@ -18168,6 +18181,7 @@
       $("devotionalTitle").textContent = d.title;
       $("devotionalRef").textContent = d.reference;
       $("devotionalTheme").textContent = d.theme;
+      $("verseIdea").textContent = d.verse || "";
       $("verseText").textContent = "Carregando o texto bíblico...";
       loadBibleVerse(d.reference).then(text => {
         if (devotionalForToday().reference === d.reference) $("verseText").textContent = "“" + text + "”";
