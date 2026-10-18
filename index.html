@@ -677,6 +677,18 @@
     @media (max-width:640px) { .kids-puzzle-grid{grid-template-rows:repeat(2,minmax(68px,1fr));gap:3px}.kids-puzzle-stage{padding:8px}.kids-puzzle-piece.locked::before{width:30px;height:30px}.kids-reward-head{display:block}.kids-puzzle-count{margin-top:10px} }
     @media (max-width:640px) { .devotional-tabs{width:100%;} .devotional-tab{flex:1;padding:10px 9px;font-size:.92rem;} }
 
+
+/* Capa com amanhecer inspirada na prévia aprovada */
+body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,235,.12) 0px, rgba(255,248,235,.25) 300px, #f6f1e8 630px), url('https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1800&q=85') center top / 100% 580px no-repeat, #f6f1e8; }
+.app-header-brand {text-align:center;padding:18px 10px 27px;color:#50331f;text-shadow:0 1px 14px rgba(255,251,241,.88)}
+.app-header-brand .leaf {color:#ba8036;font-size:30px;line-height:1}
+.app-header-brand h1 {font-family:Georgia,'Times New Roman',serif;font-size:clamp(37px,6vw,58px);line-height:1.1;font-weight:600;margin:6px 0 3px}
+.app-header-brand p {margin:0;font-size:16px}
+#app .topbar {background:rgba(255,250,242,.80);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.75);border-radius:22px;padding:16px 20px;box-shadow:0 8px 28px rgba(89,58,29,.10)}
+#app .topbar h2 {font-size:clamp(21px,3vw,29px)}
+#app .card {border:1px solid rgba(167,124,78,.13)}
+#app .devotional-tabs {backdrop-filter:blur(12px)}
+@media(max-width:700px){body:has(#app:not(.hidden)){background-size:auto,auto 450px,auto;background-position:center top}.app-header-brand{padding-top:10px}#app .topbar{padding:14px}}
   </style>
 </head>
 <body>
@@ -720,6 +732,7 @@
   </section>
 
   <main id="app" class="app hidden">
+    <header class="app-header-brand" aria-label="Maná Diário"><div class="leaf" aria-hidden="true">❧</div><h1>Maná Diário</h1><p>Palavra para o seu dia</p></header>
     <div class="topbar">
       <div>
         <h2>Seu devocional de hoje</h2>
@@ -758,6 +771,7 @@
         </div>
         <div class="verse-reading">
           <strong>📖 Leitura bíblica</strong>
+          <!-- Exibir somente o versículo e a referência; sem aviso de tradução. -->
           <blockquote>
             <span id="verseText"></span>
             <span id="verseRef"></span>
