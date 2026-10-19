@@ -18173,19 +18173,39 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       "1 João":"1 John", "1 Pedro":"1 Peter",
       "1 Tessalonicenses":"1 Thessalonians", "2 Timóteo":"2 Timothy"
     };
+    // Consulta com cache local e tentativas extras para falhas temporárias do serviço.
+    const verseRequestCache = new Map();
     async function loadBibleVerse(reference) {
       const match = reference.match(/^(.+?)\s+(\d+:\d+(?:-\d+)?)$/);
       if (!match || !bibleBookNames[match[1]]) throw new Error("Referência não reconhecida");
-      const query = `${bibleBookNames[match[1]]} ${match[2]}`;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 9000);
+      const cacheKey = "mana_biblia_almeida_" + reference;
+      if (verseRequestCache.has(reference)) return verseRequestCache.get(reference);
       try {
-        const response = await fetch(`https://bible-api.com/${encodeURIComponent(query)}?translation=almeida`, {signal:controller.signal});
-        if (!response.ok) throw new Error("Consulta bíblica indisponível");
-        const data = await response.json();
-        if (!data.text || !data.text.trim()) throw new Error("Passagem não encontrada");
-        return data.text.replace(/\s+/g, " ").trim();
-      } finally { clearTimeout(timeout); }
+        const stored = localStorage.getItem(cacheKey);
+        if (stored && stored.length > 10) return stored;
+      } catch (_) {}
+      const query = `${bibleBookNames[match[1]]} ${match[2]}`;
+      const urls = [
+        `https://bible-api.com/${encodeURIComponent(query)}?translation=almeida`,
+        `https://bible-api.com/${encodeURIComponent(query).replace(/%20/g, '+')}?translation=almeida`
+      ];
+      let lastError;
+      for (const url of urls) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 14000);
+        try {
+          const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+          if (!response.ok) throw new Error("Serviço bíblico retornou " + response.status);
+          const data = await response.json();
+          if (!data.text || !data.text.trim()) throw new Error("Passagem não encontrada");
+          const text = data.text.replace(/\s+/g, " ").trim();
+          verseRequestCache.set(reference, text);
+          try { localStorage.setItem(cacheKey, text); } catch (_) {}
+          return text;
+        } catch (error) { lastError = error; }
+        finally { clearTimeout(timeout); }
+      }
+      throw lastError || new Error("Serviço indisponível");
     }
 
     async function renderToday() {
@@ -18195,11 +18215,12 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       $("devotionalRef").textContent = d.reference;
       $("devotionalTheme").textContent = d.theme;
       $("verseIdea").textContent = d.verse || "";
-      $("verseText").textContent = "Carregando o texto bíblico...";
+      // A falha do serviço externo não impede a leitura do devocional.
+      $("verseText").textContent = "Leia " + d.reference + " na sua Bíblia. A ideia central está disponível acima.";
       loadBibleVerse(d.reference).then(text => {
         if (devotionalForToday().reference === d.reference) $("verseText").textContent = "“" + text + "”";
       }).catch(() => {
-        if (devotionalForToday().reference === d.reference) $("verseText").textContent = "Não foi possível carregar o texto bíblico. Verifique a conexão e tente atualizar a página.";
+        if (devotionalForToday().reference === d.reference) $("verseText").textContent = "Leia " + d.reference + " na sua Bíblia. A consulta automática está indisponível, mas o devocional continua funcionando.";
       });
       $("verseRef").textContent = d.reference;
       $("devotionalText").innerHTML = d.devotional.map(p => `<p>${p}</p>`).join("");
