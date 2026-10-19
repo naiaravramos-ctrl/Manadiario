@@ -770,7 +770,8 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
           <p id="verseIdea"></p>
         </div>
         <div class="verse-reading">
-          <strong>📖 Leitura bíblica</strong>
+          <strong>📖 Mensagem bíblica em linguagem simples</strong>
+          <small style="display:block;opacity:.75;margin:5px 0 8px">Adaptação do sentido da passagem, não transcrição literal de uma tradução.</small>
           <!-- Exibir somente o versículo e a referência; sem aviso de tradução. -->
           <blockquote>
             <span id="verseText"></span>
@@ -18158,54 +18159,10 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       $("journal").value = "";
     }
 
-    // O versículo é consultado diretamente em uma tradução bíblica real.
-    // Em caso de falha de conexão, não apresentamos paráfrases como se fossem citações.
-    const bibleBookNames = {
-      "Salmos":"Psalms", "Provérbios":"Proverbs", "Isaías":"Isaiah",
-      "Filipenses":"Philippians", "Romanos":"Romans", "João":"John",
-      "Mateus":"Matthew", "Marcos":"Mark", "Lucas":"Luke",
-      "Jeremias":"Jeremiah", "Josué":"Joshua", "Efésios":"Ephesians",
-      "Tiago":"James", "Hebreus":"Hebrews", "Gálatas":"Galatians",
-      "Colossenses":"Colossians", "Miqueias":"Micah", "Miquéias":"Micah",
-      "Neemias":"Nehemiah", "Deuteronômio":"Deuteronomy",
-      "Eclesiastes":"Ecclesiastes", "Lamentações":"Lamentations",
-      "1 Coríntios":"1 Corinthians", "2 Coríntios":"2 Corinthians",
-      "1 João":"1 John", "1 Pedro":"1 Peter",
-      "1 Tessalonicenses":"1 Thessalonians", "2 Timóteo":"2 Timothy"
-    };
-    // Consulta com cache local e tentativas extras para falhas temporárias do serviço.
-    const verseRequestCache = new Map();
-    async function loadBibleVerse(reference) {
-      const match = reference.match(/^(.+?)\s+(\d+:\d+(?:-\d+)?)$/);
-      if (!match || !bibleBookNames[match[1]]) throw new Error("Referência não reconhecida");
-      const cacheKey = "mana_biblia_almeida_" + reference;
-      if (verseRequestCache.has(reference)) return verseRequestCache.get(reference);
-      try {
-        const stored = localStorage.getItem(cacheKey);
-        if (stored && stored.length > 10) return stored;
-      } catch (_) {}
-      const query = `${bibleBookNames[match[1]]} ${match[2]}`;
-      const urls = [
-        `https://bible-api.com/${encodeURIComponent(query)}?translation=almeida`,
-        `https://bible-api.com/${encodeURIComponent(query).replace(/%20/g, '+')}?translation=almeida`
-      ];
-      let lastError;
-      for (const url of urls) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 14000);
-        try {
-          const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
-          if (!response.ok) throw new Error("Serviço bíblico retornou " + response.status);
-          const data = await response.json();
-          if (!data.text || !data.text.trim()) throw new Error("Passagem não encontrada");
-          const text = data.text.replace(/\s+/g, " ").trim();
-          verseRequestCache.set(reference, text);
-          try { localStorage.setItem(cacheKey, text); } catch (_) {}
-          return text;
-        } catch (error) { lastError = error; }
-        finally { clearTimeout(timeout); }
-      }
-      throw lastError || new Error("Serviço indisponível");
+    // Conteúdo local: nenhuma requisição externa é necessária para esta seção.
+    // Os textos no catálogo são adaptações em linguagem simples, não citações literais.
+    function localBibleReading(devotional) {
+      return String(devotional.verse || '').trim();
     }
 
     async function renderToday() {
@@ -18215,13 +18172,7 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       $("devotionalRef").textContent = d.reference;
       $("devotionalTheme").textContent = d.theme;
       $("verseIdea").textContent = d.verse || "";
-      // A falha do serviço externo não impede a leitura do devocional.
-      $("verseText").textContent = "Leia " + d.reference + " na sua Bíblia. A ideia central está disponível acima.";
-      loadBibleVerse(d.reference).then(text => {
-        if (devotionalForToday().reference === d.reference) $("verseText").textContent = "“" + text + "”";
-      }).catch(() => {
-        if (devotionalForToday().reference === d.reference) $("verseText").textContent = "Leia " + d.reference + " na sua Bíblia. A consulta automática está indisponível, mas o devocional continua funcionando.";
-      });
+      $("verseText").textContent = localBibleReading(d);
       $("verseRef").textContent = d.reference;
       $("devotionalText").innerHTML = d.devotional.map(p => `<p>${p}</p>`).join("");
       $("reflectionText").innerHTML = d.reflection.map(p => `<p>${p}</p>`).join("");
