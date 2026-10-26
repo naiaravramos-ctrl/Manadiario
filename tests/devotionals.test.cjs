@@ -81,3 +81,29 @@ test('novos temas estão distribuídos no ciclo, inclusive no primeiro mês', ()
 test('todo o JavaScript embutido continua sintaticamente válido', () => {
   assert.doesNotThrow(() => new vm.Script(script));
 });
+
+test('a tela mostra uma ideia central curta acima, sem substituir ou repetir a leitura bíblica abaixo', async () => {
+  const elements = new Map();
+  context.$ = id => {
+    if (!elements.has(id)) elements.set(id, { textContent: '', classList: { toggle() {} } });
+    return elements.get(id);
+  };
+  context.formattedDate = () => '';
+  context.dateKey = () => '';
+  context.updateCounter = () => {};
+  context.refreshRewardDisplay = async () => {};
+  vm.runInContext('const db = null; const currentUserId = null;', context);
+  vm.runInContext(script.match(/    function localBibleReading\(devotional\) \{[\s\S]*?\n    \}/)[0], context);
+  vm.runInContext(script.match(/    async function renderToday\(\) \{[\s\S]*?\n    \}/)[0], context);
+
+  for (let day = 0; day < devotionals.length; day++) {
+    const d = context.selectDay(day);
+    await context.renderToday();
+    const idea = elements.get('verseIdea').textContent;
+    assert.ok(typeof idea === 'string' && idea.trim(), `ideia ausente: ${d.title}`);
+    assert.ok(idea.length <= 160, `ideia longa: ${d.title}`);
+    assert.notEqual(idea, d.verse, `ideia repetiu a passagem: ${d.title}`);
+    assert.equal(elements.get('verseText').textContent, d.verse, d.title);
+    assert.equal(elements.get('verseRef').textContent, d.reference, d.title);
+  }
+});

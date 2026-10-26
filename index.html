@@ -27638,6 +27638,82 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       return [devotional, ...additionalDevotionals.slice(start, end)];
     });
 
+    // Resumos do assunto, separados da leitura bíblica exibida abaixo.
+    const centralIdeasByTheme = {
+      "Alegria": "Reconheça os motivos de alegria que Deus oferece, mesmo em dias difíceis.",
+      "Amizade": "Cultive amizades que ajudam você a crescer e a fazer o bem.",
+      "Amor": "Demonstre amor com atitudes de respeito, paciência e cuidado.",
+      "Amor de Deus": "Sua vida pode encontrar segurança no amor constante de Deus.",
+      "Ansiedade": "Compartilhe suas preocupações com Deus e aceite o apoio de que precisa.",
+      "Ansiedade e paz": "Leve suas preocupações a Deus e cuide de um passo de cada vez.",
+      "Bondade": "Escolha fazer o bem, mesmo quando seria mais fácil reagir com dureza.",
+      "Caráter": "Deixe a fé transformar suas atitudes e o modo como trata as pessoas.",
+      "Compaixão": "Perceba a dor do outro e ofereça uma ajuda concreta.",
+      "Comunidade": "Caminhe com outras pessoas e participe do cuidado mútuo.",
+      "Contentamento": "Valorize o que você tem sem medir sua vida pela dos outros.",
+      "Coragem": "Enfrente o próximo passo com confiança em Deus e responsabilidade.",
+      "Coração": "Cuide da sua vida interior, pois ela influencia suas escolhas.",
+      "Cuidado de Deus": "Reconheça o cuidado de Deus e permita-se receber ajuda.",
+      "Dependência de Deus": "Fortaleça seu vínculo com Deus em vez de tentar sustentar tudo sozinho.",
+      "Descanso": "Respeite seus limites e encontre espaço para recuperar as forças.",
+      "Direção": "Busque na Palavra de Deus orientação para suas decisões.",
+      "Entrega": "Apresente seus planos a Deus e faça com responsabilidade o que está ao seu alcance.",
+      "Espera": "Espere com confiança sem abandonar os cuidados necessários de hoje.",
+      "Esperança": "A dificuldade atual não precisa encerrar sua confiança no futuro.",
+      "Estações": "Reconheça a fase que você está vivendo e cuide bem dela.",
+      "Excelência": "Realize suas tarefas com dedicação e respeito por quem será beneficiado.",
+      "Família": "Cultive a fé em casa por meio do exemplo, da conversa e do cuidado.",
+      "Fidelidade": "Seja confiável nas pequenas responsabilidades do cotidiano.",
+      "Firmeza": "Mantenha seus valores mesmo quando as circunstâncias mudarem.",
+      "Força": "Busque em Deus sustento para enfrentar suas responsabilidades.",
+      "Fé": "Confie em Deus mesmo quando você ainda não consegue enxergar todo o caminho.",
+      "Fé e confiança": "Dê o próximo passo com Deus, sem exigir ter todas as respostas.",
+      "Generosidade": "Use seus recursos para honrar a Deus e atender necessidades reais.",
+      "Gratidão": "Reconheça o bem recebido e agradeça pelos cuidados do cotidiano.",
+      "Graça": "Suas limitações não impedem você de receber o cuidado de Deus.",
+      "Humildade": "Considere as necessidades dos outros sem colocar seu próprio interesse sempre em primeiro lugar.",
+      "Identidade": "Seu valor não depende de aprovação, aparência ou desempenho.",
+      "Influências": "Escolha companhias que incentivem sabedoria e atitudes responsáveis.",
+      "Integridade": "Procure coerência entre o que você pensa, fala e faz.",
+      "Justiça e humildade": "Pratique a justiça com misericórdia e reconheça seus próprios limites.",
+      "Mansidão": "Responda com calma e respeito, sem abrir mão da verdade.",
+      "Memória": "Lembre os cuidados já recebidos para fortalecer a gratidão de hoje.",
+      "Nova vida": "Uma nova direção com Cristo pode transformar suas escolhas.",
+      "Novidade": "Esteja aberto a caminhos novos sem perder a responsabilidade pelo presente.",
+      "Obediência": "Transforme o que você aprende na Palavra em atitudes concretas.",
+      "Oração": "Converse com Deus com sinceridade e constância.",
+      "Paciência": "Dê tempo ao diálogo e ao crescimento antes de reagir por impulso.",
+      "Palavras": "Use suas palavras para cuidar, orientar e construir.",
+      "Paz": "Cultive serenidade e procure caminhos de reconciliação.",
+      "Perdão": "Abra espaço para o perdão com verdade, responsabilidade e limites seguros.",
+      "Perseverança": "Continue fazendo o bem sem desprezar os pequenos avanços.",
+      "Perspectiva": "Olhe além da dificuldade imediata sem ignorar os cuidados que ela exige.",
+      "Planos": "Planeje com responsabilidade e mantenha abertura à direção de Deus.",
+      "Presente": "Cuide das responsabilidades de hoje sem carregar todo o amanhã.",
+      "Presença de Deus": "Você pode buscar o amparo de Deus mesmo nos momentos de maior fragilidade.",
+      "Prioridades": "Organize suas escolhas a partir do que tem valor diante de Deus.",
+      "Processo": "Reconheça que o amadurecimento acontece ao longo de uma caminhada.",
+      "Propósito": "Procure oportunidades de fazer o bem nas situações que você vive.",
+      "Raízes": "Fortaleça sua vida com atenção constante à Palavra de Deus.",
+      "Recomeço": "Receba este dia como uma oportunidade de corrigir o rumo e seguir.",
+      "Relacionamentos": "Escute com atenção e trate as pessoas como você gostaria de ser tratado.",
+      "Sabedoria": "Busque discernimento antes de decidir e esteja disposto a aprender.",
+      "Serviço": "Coloque suas habilidades a serviço das necessidades de outras pessoas.",
+      "Silêncio": "Faça uma pausa para reconhecer a presença de Deus e ouvir com atenção.",
+      "Sinceridade": "Apresente sua vida a Deus com honestidade, sem sustentar aparências.",
+      "Socorro": "Reconheça quando precisa de ajuda e busque apoio com confiança.",
+      "Tempo": "Use seu tempo com atenção ao que realmente importa.",
+      "Testemunho": "Deixe sua fé aparecer em boas atitudes no cotidiano.",
+      "Transformação": "Reveja seus hábitos e permita que a fé renove sua maneira de viver.",
+      "Unidade": "Cuide dos vínculos com humildade, paciência e respeito às diferenças.",
+      "Vida abundante": "Busque em Cristo uma vida com sentido, cuidado e vínculos verdadeiros."
+};
+
+    function devotionalCentralIdea(devotional) {
+      // Nos novos temas, o segundo parágrafo já contém uma síntese curta e própria.
+      return centralIdeasByTheme[devotional.theme] || devotional.devotional[1];
+    }
+
     const KIDS_PUZZLE_PIECES = 7;
     const kidsPuzzleThemes = [
       { title:"A Arca de Noé", teaser:"Uma aventura com animais e um arco-íris!", scene:"noah" },
@@ -27872,7 +27948,7 @@ body:has(#app:not(.hidden)) { background: linear-gradient(180deg, rgba(255,248,2
       $("devotionalTitle").textContent = d.title;
       $("devotionalRef").textContent = d.reference;
       $("devotionalTheme").textContent = d.theme;
-      $("verseIdea").textContent = d.verse || "";
+      $("verseIdea").textContent = devotionalCentralIdea(d);
       $("verseText").textContent = localBibleReading(d);
       $("verseRef").textContent = d.reference;
       $("devotionalText").innerHTML = d.devotional.map(p => `<p>${p}</p>`).join("");
