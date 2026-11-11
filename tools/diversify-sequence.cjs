@@ -31,7 +31,7 @@ function features(d) {
   return { theme, chapters, book, families, words };
 }
 
-function buildOrder(catalog, cutover) {
+function buildOrder(catalog, cutover, passageGap = 28, themeGap = 21) {
   const n = catalog.length;
   const f = catalog.map(features);
   // A compact pair matrix keeps optimization out of the mobile app.
@@ -48,9 +48,9 @@ function buildOrder(catalog, cutover) {
   }
   function penalty(a, b, distance) {
     const flags = pairs[a * n + b];
-    return ((flags & 1) ? (15 - distance) * 1000 : 0)
-      + ((flags & 2) && distance <= 10 ? (11 - distance) * 200 : 0)
-      + ((flags & 4) && distance <= 3 ? (4 - distance) * 10 : 0)
+    return ((flags & 1) && distance < passageGap ? (passageGap - distance) * 1000 : 0)
+      + ((flags & 2) && distance < themeGap ? (themeGap - distance) * 1000 : 0)
+      + ((flags & 4) && distance <= 5 ? (6 - distance) * 10 : 0)
       + ((flags & 8) && distance <= 2 ? (3 - distance) * 2 : 0)
       + ((flags & 16) && distance <= 7 ? (8 - distance) * 20 : 0);
   }
@@ -63,7 +63,7 @@ function buildOrder(catalog, cutover) {
       // Previously displayed entries cannot reappear within 300 days of reading.
       if (day < 300 && candidate < cutover) continue;
       let score = random();
-      for (let distance = 1; distance <= 14; distance++) {
+      for (let distance = 1; distance < Math.max(passageGap, themeGap); distance++) {
         const previous = day >= distance ? order[day - distance] : (cutover + day - distance + n) % n;
         score += penalty(candidate, previous, distance);
       }
@@ -74,7 +74,7 @@ function buildOrder(catalog, cutover) {
   }
   function localCost(position) {
     let cost = 0;
-    for (let distance = 1; distance <= 14; distance++) {
+    for (let distance = 1; distance < Math.max(passageGap, themeGap); distance++) {
       cost += penalty(order[position], order[(position + distance) % n], distance);
       cost += penalty(order[position], order[(position - distance + n) % n], distance);
       // Include both the transition from the old sequence and the circular seam.
@@ -82,16 +82,60 @@ function buildOrder(catalog, cutover) {
     }
     return cost;
   }
-  for (let iteration = 0; iteration < 350000; iteration++) {
+  const iterations = 2000000;
+  for (let iteration = 0; iteration < iterations; iteration++) {
     const a = Math.floor(random() * n), b = Math.floor(random() * n);
     if (a === b || (a < 300 && order[b] < cutover) || (b < 300 && order[a] < cutover)) continue;
     const before = localCost(a) + localCost(b);
     // The pair (a,b) is counted twice but its cost is unchanged by swapping.
     [order[a], order[b]] = [order[b], order[a]];
     const delta = localCost(a) + localCost(b) - before;
-    const temperature = 50 * Math.pow(1 - iteration / 350000, 3);
+    const temperature = 1500 * Math.pow(1 - iteration / iterations, 4);
     if (delta > 0 && random() >= Math.exp(-delta / temperature)) [order[a], order[b]] = [order[b], order[a]];
   }
+  // Repair any residual close readings without trading them for softer preferences.
+  const window = Math.max(passageGap, themeGap);
+  function hardPenalty(a, b, distance) {
+    const flags = pairs[a * n + b];
+    return ((flags & 1) && distance < passageGap ? 1000 + passageGap - distance : 0)
+      + ((flags & 2) && distance < themeGap ? 1000 + themeGap - distance : 0);
+  }
+  function hardCost(position) {
+    let cost = 0;
+    for (let d = 1; d < window; d++) {
+      cost += hardPenalty(order[position], order[(position + d) % n], d);
+      cost += hardPenalty(order[position], order[(position - d + n) % n], d);
+      if (position < d) cost += hardPenalty(order[position], (cutover + position - d + n) % n, d);
+    }
+    return cost;
+  }
+  let repaired = false;
+  for (let attempt = 0; attempt < 2000; attempt++) {
+    const conflicts = [];
+    for (let a = 0; a < n; a++) {
+      for (let d = 1; d < window; d++) {
+        if (hardPenalty(order[a], order[(a + d) % n], d)) conflicts.push(a, (a + d) % n);
+        if (a < d && hardPenalty(order[a], (cutover + a - d + n) % n, d)) conflicts.push(a);
+      }
+    }
+    if (!conflicts.length) { repaired = true; break; }
+    const a = conflicts[Math.floor(random() * conflicts.length)];
+    let bestB, bestDelta = Infinity;
+    for (let sample = 0; sample < n; sample++) {
+      const b = (sample + attempt * 37) % n;
+      if (a === b || (a < 300 && order[b] < cutover) || (b < 300 && order[a] < cutover)) continue;
+      const before = hardCost(a) + hardCost(b);
+      [order[a], order[b]] = [order[b], order[a]];
+      const delta = hardCost(a) + hardCost(b) - before;
+      [order[a], order[b]] = [order[b], order[a]];
+      if (delta < bestDelta) { bestDelta = delta; bestB = b; }
+      if (bestDelta < 0) break;
+    }
+    if (bestB !== undefined && (bestDelta <= 0 || random() < 0.02)) {
+      [order[a], order[bestB]] = [order[bestB], order[a]];
+    }
+  }
+  if (!repaired) throw new Error('Could not meet the requested spacing; existing schedule has not been overwritten');
   return order;
 }
 
@@ -110,8 +154,8 @@ if (require.main === module) {
   let html = fs.readFileSync(htmlPath, 'utf8');
   const catalogs = loadCatalogs(html);
   const cutover = 315; // 12 November 2026, Australia/Brisbane; epoch 1 January 2026.
-  const adult = buildOrder(catalogs.adult, cutover);
-  const child = buildOrder(catalogs.child, cutover);
+  const adult = buildOrder(catalogs.adult, cutover, 28, 21);
+  const child = buildOrder(catalogs.child, cutover, 18, 18);
   const block = `    // DAILY_SEQUENCE_START: generated by tools/diversify-sequence.cjs.\n`
     + `    // Keep this date and both permutations stable: dates also identify saved reflections.\n`
     + `    const DAILY_SEQUENCE_START = 315; // 2026-11-12 in Australia/Brisbane\n`

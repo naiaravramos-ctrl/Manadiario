@@ -102,12 +102,12 @@ test('o mesmo devocional fica a pelo menos 300 dias de distância, inclusive na 
   }
 });
 
-test('passagens do mesmo capítulo ficam separadas por pelo menos 15 dias em ambos os ciclos', () => {
+test('passagens do mesmo capítulo ficam separadas por 28 dias no adulto e 18 no infantil', () => {
   const chapters = d => normalize(d.reference).split(';').map(p => p.trim().replace(/:\d+.*$/, ''));
-  for (const [child, total] of [[false, devotionals.length], [true, children.length]]) {
-    for (let day = 315; day < 315 + total + 14; day++) {
+  for (const [child, total, gap] of [[false, devotionals.length, 28], [true, children.length, 18]]) {
+    for (let day = 315; day < 315 + total + gap; day++) {
       const current = chapters(context.selectDay(day, child));
-      for (let distance = 1; distance <= 14; distance++) {
+      for (let distance = 1; distance < gap; distance++) {
         const previous = chapters(context.selectDay(day - distance, child));
         assert.ok(!current.some(ch => previous.includes(ch)), `capítulo próximo: dia ${day}, distância ${distance}`);
       }
@@ -115,11 +115,11 @@ test('passagens do mesmo capítulo ficam separadas por pelo menos 15 dias em amb
   }
 });
 
-test('temas iguais ficam separados por pelo menos 11 dias', () => {
+test('temas iguais ficam separados por 21 dias no adulto e 18 no infantil', () => {
   const theme = d => normalize(d.theme || d.explanation[0].match(/sobre ([^.]+)/)[1]);
-  for (const [child, total] of [[false, devotionals.length], [true, children.length]]) {
-    for (let day = 315; day < 315 + total + 10; day++) {
-      for (let distance = 1; distance <= 10; distance++) {
+  for (const [child, total, gap] of [[false, devotionals.length, 21], [true, children.length, 18]]) {
+    for (let day = 315; day < 315 + total + gap; day++) {
+      for (let distance = 1; distance < gap; distance++) {
         assert.notEqual(theme(context.selectDay(day, child)), theme(context.selectDay(day - distance, child)), `tema próximo: dia ${day}`);
       }
     }
